@@ -27,7 +27,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.protobee.guice.example.Battlestar;
 import org.protobee.guice.example.BattlestarFactory;
-import org.protobee.guice.example.scopedClasses.CommandDeck;
+import org.protobee.guice.example.scoped.CommandDeck;
 
 import com.google.inject.ProvisionException;
 

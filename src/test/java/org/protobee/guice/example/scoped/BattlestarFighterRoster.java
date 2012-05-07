@@ -18,7 +18,7 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package org.protobee.guice.example.scopedClasses;
+package org.protobee.guice.example.scoped;
 
 import java.util.Set;
 
@@ -27,10 +27,16 @@ import org.protobee.guice.example.scopes.BattlestarScope;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.inject.Inject;
 
 @BattlestarScope
 public class BattlestarFighterRoster {
   public final Set<Fighter> fighters = Sets.newHashSet();
+  
+  @Inject
+  public BattlestarFighterRoster() {
+    
+  }
 
   public void addFighter(Fighter fighter) {
     fighters.add(fighter);

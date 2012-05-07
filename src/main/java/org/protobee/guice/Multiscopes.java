@@ -96,13 +96,13 @@ public final class Multiscopes {
 
     final Provider<Map<Key<?>, Object>> mapProvider =
         binder.<Map<Key<?>, Object>>getProvider(Key.get(scopeMap, newHolderAnnotation));
-
+    
     binder
         .bind(ScopeHolder.class)
         .annotatedWith(multiscope.getHolderAnnotation())
         .toProvider(
             new PrescopedProvider<ScopeHolder>("ScopeHolder should have been bound internally.",
-                "PrescopedProvider-ScopeHolder-" + scopeAnnotation.toString())).in(scopeAnnotation);
+                scopeAnnotation.getSimpleName()+"-ScopeHolderFakeProvider")).in(scopeAnnotation);
 
     binder.bind(ScopeHolder.class).annotatedWith(newHolderAnnotation)
         .toProvider(new Provider<ScopeHolder>() {
@@ -115,7 +115,7 @@ public final class Multiscopes {
 
           @Override
           public String toString() {
-            return scopeAnnotation + "-New-ScopeHolder-Provider";
+            return scopeAnnotation.getSimpleName() + "-NewScopeHolderProvider";
           }
         });
   }

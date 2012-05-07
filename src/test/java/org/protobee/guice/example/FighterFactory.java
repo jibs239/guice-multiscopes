@@ -21,7 +21,7 @@
 package org.protobee.guice.example;
 
 import org.protobee.guice.ScopeHolder;
-import org.protobee.guice.example.scopedClasses.BattlestarFighterRoster;
+import org.protobee.guice.example.scoped.BattlestarFighterRoster;
 import org.protobee.guice.example.scopes.ExampleScopes;
 import org.protobee.guice.example.scopes.NewFighterScopeHolder;
 

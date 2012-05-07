@@ -25,7 +25,7 @@ import static org.junit.Assert.*;
 import org.junit.After;
 import org.junit.Test;
 import org.protobee.guice.example.ExamplesGuiceModule;
-import org.protobee.guice.example.scopedClasses.CommandDeck;
+import org.protobee.guice.example.scoped.CommandDeck;
 import org.protobee.guice.example.scopes.BattlestarScope;
 import org.protobee.guice.example.scopes.BattlestarScopeHolder;
 import org.protobee.guice.example.scopes.ExampleScopes;

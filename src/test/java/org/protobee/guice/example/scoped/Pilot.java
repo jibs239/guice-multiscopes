@@ -18,27 +18,19 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package org.protobee.guice.example.scopedClasses;
+package org.protobee.guice.example.scoped;
 
-import org.protobee.guice.example.scopes.BattlestarScope;
+import org.protobee.guice.example.scopes.FighterScope;
 
-@BattlestarScope
-public class CommandDeck {
+@FighterScope
+public class Pilot {
+
   private String name;
-  private int capacity;
-  
+
   public String getName() {
     return name;
   }
-  
-  public int getCapacity() {
-    return capacity;
-  }
-  
-  public void setCapacity(int capacity) {
-    this.capacity = capacity;
-  }
-  
+
   public void setName(String name) {
     this.name = name;
   }
@@ -47,7 +39,6 @@ public class CommandDeck {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + capacity;
     result = prime * result + ((name == null) ? 0 : name.hashCode());
     return result;
   }
@@ -57,8 +48,7 @@ public class CommandDeck {
     if (this == obj) return true;
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
-    CommandDeck other = (CommandDeck) obj;
-    if (capacity != other.capacity) return false;
+    Pilot other = (Pilot) obj;
     if (name == null) {
       if (other.name != null) return false;
     } else if (!name.equals(other.name)) return false;

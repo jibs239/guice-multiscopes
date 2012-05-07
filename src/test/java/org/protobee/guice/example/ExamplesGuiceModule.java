@@ -22,10 +22,10 @@ package org.protobee.guice.example;
 
 import static org.protobee.guice.Multiscopes.bindMultiscope;
 
-import org.protobee.guice.example.scopedClasses.BattlestarFighterRoster;
-import org.protobee.guice.example.scopedClasses.CommandDeck;
-import org.protobee.guice.example.scopedClasses.FighterWeapons;
-import org.protobee.guice.example.scopedClasses.Pilot;
+import org.protobee.guice.example.scoped.BattlestarFighterRoster;
+import org.protobee.guice.example.scoped.CommandDeck;
+import org.protobee.guice.example.scoped.FighterWeapons;
+import org.protobee.guice.example.scoped.Pilot;
 import org.protobee.guice.example.scopes.BattlestarScope;
 import org.protobee.guice.example.scopes.ExampleScopes;
 import org.protobee.guice.example.scopes.FighterScope;

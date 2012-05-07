@@ -1,4 +1,4 @@
-package org.protobee.guice.testscope;
+package org.protobee.guice.example.scopes;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 import com.google.inject.BindingAnnotation;
 
 /**
- * Specifies a new test scope holder (so we're creating a new instance of the test scope)
+ * Specifies the battlestar scope holder in the {@link BattlestarScope}
  * 
  * @author Daniel Murphy (daniel@dmurph.com)
  */
@@ -17,4 +17,4 @@ import com.google.inject.BindingAnnotation;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
 @BindingAnnotation
-public @interface DepartmentScopeHolder {}
+public @interface BattlestarScopeHolder {}

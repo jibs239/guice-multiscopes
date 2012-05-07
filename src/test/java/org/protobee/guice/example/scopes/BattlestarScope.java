@@ -1,4 +1,4 @@
-package org.protobee.guice.testscope;
+package org.protobee.guice.example.scopes;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 import com.google.inject.ScopeAnnotation;
 
 /**
- * Specifies an object that exists in the test scope
+ * Scopes an object in the battlestar scope (ie, one object instance per battlestar scope)
  * 
  * @author Daniel
  */
@@ -17,4 +17,4 @@ import com.google.inject.ScopeAnnotation;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @ScopeAnnotation
-public @interface TestScope {}
+public @interface BattlestarScope {}

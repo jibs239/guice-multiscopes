@@ -10,11 +10,12 @@ import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 
 /**
- * Class for binding multiscopes. Each multiscope needs
+ * Class for binding multiscopes. Each multiscope binding needs
  * <ul>
+ * <li>A {@link Multiscope} instance
  * <li>A scope annotation, like all scopes
- * <li>A 'new holder' annotation, used to inject a new instance of a {@link ScopeHolder} for this
- * scope (also to specify the new scope holder internally)
+ * <li>A 'new holder' binding annotation, used to inject a new instance of a {@link ScopeHolder} for
+ * this scope (also to specify the new scope holder internally)
  * <li>Optionally, a provider for the scope map. This defaults to {@link DefaultScopeMapProvider}
  * </ul>
  * 

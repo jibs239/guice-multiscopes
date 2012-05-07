@@ -55,7 +55,7 @@ public class FighterFactory {
    * Creates a fighter scope in a {@link Fighter}, and adds the fighter to the
    * {@link BattlestarFighterRoster} from the battlestar scope. If prescoped objects were needed for
    * the fighter scope, they would probably be arguments of this method and put into the scope
-   * before the creation of the model. <br/>
+   * before the creation of the fighter. <br/>
    * Preconditions: not in a fighter scope, and we need to be in the parent battlestar scope.
    */
   public Fighter create() {

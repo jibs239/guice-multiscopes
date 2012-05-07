@@ -47,6 +47,8 @@ public class ExamplesGuiceModule extends AbstractModule {
     bind(FighterWeapons.class).in(FighterScope.class);
     bind(Pilot.class).in(FighterScope.class);
     
+    bind(Descoper.class);
+    
     bind(Battlestar.class).in(BattlestarScope.class);
     bind(BattlestarFactory.class).in(Singleton.class);
     bind(Fighter.class).in(FighterScope.class);

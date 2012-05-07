@@ -1,11 +1,41 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
   <groupId>org.protobee.guice</groupId>
   <artifactId>guice-multiscopes</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>guice-multiscopes</name>
-  <description>guice scopes with multiple instances and multithreaded access</description>
+  <description>multi-instance guice scopes with multithreaded access</description>
+  <url>http://code.google.com/p/guice-multiscopes</url>
+  <packaging>jar</packaging>
+  <licenses>
+    <license>
+      <name>The BSD 2-Clause License</name>
+      <url>http://opensource.org/licenses/BSD-2-Clause</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <name>Daniel Murphy</name>
+      <email>daniel@dmurph.com</email>
+      <url>http://www.dmurph.com</url>
+    </developer>
+    <developer>
+      <name>Deanna Surma</name>
+      <email>dms424@cornell.edu</email>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:hg:http://code.google.com/p/guice-multiscopes</connection>
+    <developerConnection>scm:hg:https://code.google.com/p/guice-multiscopes</developerConnection>
+    <url>http://code.google.com/p/guice-multiscopes</url>
+  </scm>
   <dependencies>
     <dependency>
       <groupId>com.google.inject</groupId>
@@ -16,6 +46,12 @@
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>12.0</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.10</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <build>

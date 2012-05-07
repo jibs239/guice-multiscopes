@@ -5,5 +5,5 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({IncorrectUsesTests.class, ScopingTests.class})
+@SuiteClasses({InternalTests.class, MultipleScopeExampleTests.class, SingleScopeExampleTests.class})
 public class MultiscopeTestSuite {}

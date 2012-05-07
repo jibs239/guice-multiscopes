@@ -2,7 +2,6 @@ package org.protobee.guice;
 
 import javax.annotation.Nullable;
 
-import com.google.common.base.Preconditions;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 
@@ -17,10 +16,14 @@ public class PrescopedProvider<T> implements Provider<T> {
   private final String exceptionMessage;
   private final String description;
 
+  public PrescopedProvider() {
+    this(null, null);
+  }
+
   /**
    * @param exceptionMessage the message for the exception when {@link #get()} is called
    */
-  public PrescopedProvider(String exceptionMessage) {
+  public PrescopedProvider(@Nullable String exceptionMessage) {
     this(exceptionMessage, null);
   }
 
@@ -28,15 +31,16 @@ public class PrescopedProvider<T> implements Provider<T> {
    * @param exceptionMessage the message for the exception when {@link #get()} is called
    * @param description what's returned when {@link #toString()} is called
    */
-  public PrescopedProvider(String exceptionMessage, @Nullable String description) {
-    Preconditions.checkNotNull(exceptionMessage, "typeClass is null");
+  public PrescopedProvider(@Nullable String exceptionMessage, @Nullable String description) {
     this.description = description;
     this.exceptionMessage = exceptionMessage;
   }
 
   @Override
   public T get() {
-    throw new ProvisionException("Object wasn't prescoped.  " + exceptionMessage);
+    throw new ProvisionException(exceptionMessage != null
+        ? exceptionMessage
+        : "Prescoped object, this provider should never be called.");
   }
 
   @Override

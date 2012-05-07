@@ -72,7 +72,10 @@ public final class Multiscopes {
     binder.bindScope(scopeAnnotation, multiscope);
     final TypeLiteral<Map<Key<?>, Object>> scopeMap = new TypeLiteral<Map<Key<?>, Object>>() {};
     binder.bind(scopeMap).annotatedWith(newHolderAnnotation)
-        .toProvider(DefaultScopeMapProvider.class);
+        .toProvider(scopeMapProvider);
+
+    final Provider<Map<Key<?>, Object>> mapProvider =
+        binder.<Map<Key<?>, Object>>getProvider(Key.get(scopeMap, newHolderAnnotation));
 
     binder
         .bind(ScopeHolder.class)
@@ -83,10 +86,11 @@ public final class Multiscopes {
 
     binder.bind(ScopeHolder.class).annotatedWith(newHolderAnnotation)
         .toProvider(new Provider<ScopeHolder>() {
+
+
           @Override
           public ScopeHolder get() {
-            return multiscope.createScopeHolder(binder.<Map<Key<?>, Object>>getProvider(
-                Key.get(scopeMap, newHolderAnnotation)).get());
+            return multiscope.createScopeHolder(mapProvider.get());
           }
 
           @Override

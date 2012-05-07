@@ -13,6 +13,9 @@
   <description>multi-instance guice scopes with multithreaded access</description>
   <url>http://code.google.com/p/guice-multiscopes</url>
   <packaging>jar</packaging>
+  <properties>
+  	<test>org.protobee.guice.MultiscopeTestSuite</test>
+  </properties>
   <licenses>
     <license>
       <name>The BSD 2-Clause License</name>

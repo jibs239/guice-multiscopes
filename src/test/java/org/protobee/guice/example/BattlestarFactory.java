@@ -3,6 +3,7 @@ package org.protobee.guice.example;
 import org.protobee.guice.ScopeHolder;
 import org.protobee.guice.example.scopes.NewBattlestarScopeHolder;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
@@ -17,6 +18,7 @@ public class BattlestarFactory {
   private final Provider<ScopeHolder> scopeProvider;
   private final Provider<Battlestar> battlestarProvider;
 
+  @Inject
   public BattlestarFactory(@NewBattlestarScopeHolder Provider<ScopeHolder> scopeProvider,
       Provider<Battlestar> battlestarProvider) {
     this.scopeProvider = scopeProvider;

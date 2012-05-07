@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.MapMaker;
 import com.google.inject.Key;
 import com.google.inject.OutOfScopeException;
 import com.google.inject.Provider;
@@ -109,17 +108,6 @@ public class Multiscope implements Scope {
     synchronized (scopeLock) {
       scopeContext.set(null);
     }
-  }
-
-  /**
-   * Creates a new scope holder for this scope and adds the holder to the scope (annotated by the
-   * holder annotation for this scope). Calls {@link #createScopeHolder(Map)} with a default scope
-   * map with a concurrency level of 8
-   * 
-   * @return
-   */
-  protected ScopeHolder createScopeHolder() {
-    return this.createScopeHolder(new MapMaker().concurrencyLevel(8).<Key<?>, Object>makeMap());
   }
 
   /**

@@ -20,9 +20,9 @@
  ******************************************************************************/
 package org.protobee.guice.example;
 
-import org.protobee.guice.ScopeHolder;
+import org.protobee.guice.ScopeInstance;
 import org.protobee.guice.example.scopes.FighterScope;
-import org.protobee.guice.example.scopes.FighterScopeHolder;
+import org.protobee.guice.example.scopes.FighterScopeInstance;
 
 import com.google.inject.Inject;
 
@@ -37,11 +37,11 @@ import com.google.inject.Inject;
 @FighterScope
 public class Fighter {
 
-  private final ScopeHolder scope;
+  private final ScopeInstance scope;
   private final Battlestar battlestar;
 
   @Inject
-  public Fighter(@FighterScopeHolder ScopeHolder scope, Battlestar battlestar) {
+  public Fighter(@FighterScopeInstance ScopeInstance scope, Battlestar battlestar) {
     this.scope = scope;
     this.battlestar = battlestar;
   }
@@ -50,7 +50,7 @@ public class Fighter {
     return battlestar;
   }
 
-  public ScopeHolder getScope() {
+  public ScopeInstance getScope() {
     return scope;
   }
 
@@ -59,7 +59,7 @@ public class Fighter {
    * in the finally clause
    * 
    * @throws IllegalStateException if we're already in a figher scope
-   * @see ScopeHolder#enterScope()
+   * @see ScopeInstance#enterScope()
    */
   public void enterScope() throws IllegalStateException {
     scope.enterScope();
@@ -71,7 +71,7 @@ public class Fighter {
 
   /**
    * Exits the fighter scope.
-   * @see ScopeHolder#exitScope()
+   * @see ScopeInstance#exitScope()
    */
   public void exitScope() {
     scope.exitScope();

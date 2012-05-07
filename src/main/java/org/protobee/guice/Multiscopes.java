@@ -34,15 +34,15 @@ import com.google.inject.TypeLiteral;
  * <ul>
  * <li>A {@link Multiscope} instance
  * <li>A scope annotation, like all scopes
- * <li>A 'new holder' binding annotation, used to inject a new instance of a {@link ScopeHolder} for
- * this scope (also to specify the new scope holder internally)
- * <li>Optionally, a provider for the scope map. This defaults to {@link DefaultScopeMapProvider}
+ * <li>A 'new scope instance' binding annotation, used to inject a new {@link ScopeInstance} for
+ * the {@link Multiscope} (also to specify a new scope storage map internally)
+ * <li>Optionally, a provider for the scope storage map. This defaults to {@link DefaultScopeMapProvider}
  * </ul>
  * 
  * You should be storing your multiscope instances as a <code>public static final</code> variable in
  * one of your classes. This way, you can access {@link Multiscope#isInScope()} and
  * {@link Multiscope#exitScope()} for testing and other cases where you need to check or exit the
- * scope when you don't have access to the scope holder itself.
+ * scope when you don't have access to the scope instance itself.
  * 
  * @author Daniel Murphy (daniel@dmurph.com)
  */
@@ -51,38 +51,38 @@ public final class Multiscopes {
   private Multiscopes() {}
 
   /**
-   * Binds the multiscope to the scope annotation, and binds {@link ScopeHolder} as prescoped in the
-   * scope as well. Creating new scope holders for this multiscope is bound to the
-   * newHolderAnnotation, as well as the scope map provider. This call uses the default
+   * Binds the multiscope to the scope annotation, and binds {@link ScopeInstance} as prescoped in the
+   * scope as well. Creating new scope instances for this multiscope is bound to the
+   * newInstanceAnnotation, as well as the scope map provider. This call uses the default
    * {@link DefaultScopeMapProvider}.
    * 
    * @param binder the binder to use
    * @param multiscope the multiscope instance
    * @param scopeAnnotation the scope annotation itself
-   * @param newHolderAnnotation the annotation for creating a new scope holder (and a new scope map)
+   * @param newScopeInstanceAnnotation the annotation for creating a new scope instance (and a new scope map)
    */
   public static void bindMultiscope(final Binder binder, final Multiscope multiscope,
       final Class<? extends Annotation> scopeAnnotation,
-      final Class<? extends Annotation> newHolderAnnotation) {
-    bindMultiscope(binder, multiscope, scopeAnnotation, newHolderAnnotation,
+      final Class<? extends Annotation> newScopeInstanceAnnotation) {
+    bindMultiscope(binder, multiscope, scopeAnnotation, newScopeInstanceAnnotation,
         DefaultScopeMapProvider.class);
   }
 
   /**
-   * Binds the multiscope to the scope annotation, and binds {@link ScopeHolder} as prescoped in the
-   * scope as well. Creating new scope holders for this multiscope is bound to the
-   * newHolderAnnotation, as well as the scopeMapProvider.
+   * Binds the multiscope to the scope annotation, and binds {@link ScopeInstance} as prescoped in the
+   * scope as well. Creating new scope instances for this multiscope is bound to the
+   * newInstanceAnnotation, as well as the scopeMapProvider.
    * 
    * @param binder the binder to use
    * @param multiscope the multiscope instance
    * @param scopeAnnotation the scope annotation itself
-   * @param newHolderAnnotation the annotation for creating a new scope holder (and a new scope map)
+   * @param newInstanceAnnotation the annotation for creating a new scope instance (and a new scope map)
    * @param scopeMapProvider the provider for the scope map. If you're accessing your scoped
    *        concurrently, this map should be threadsafe.
    */
   public static void bindMultiscope(final Binder binder, final Multiscope multiscope,
       final Class<? extends Annotation> scopeAnnotation,
-      final Class<? extends Annotation> newHolderAnnotation,
+      final Class<? extends Annotation> newInstanceAnnotation,
       final Class<? extends Provider<Map<Key<?>, Object>>> scopeMapProvider) {
     Preconditions.checkNotNull(multiscope);
     Preconditions.checkNotNull(scopeAnnotation);
@@ -91,31 +91,31 @@ public final class Multiscopes {
 
     binder.bindScope(scopeAnnotation, multiscope);
     final TypeLiteral<Map<Key<?>, Object>> scopeMap = new TypeLiteral<Map<Key<?>, Object>>() {};
-    binder.bind(scopeMap).annotatedWith(newHolderAnnotation)
+    binder.bind(scopeMap).annotatedWith(newInstanceAnnotation)
         .toProvider(scopeMapProvider);
 
     final Provider<Map<Key<?>, Object>> mapProvider =
-        binder.<Map<Key<?>, Object>>getProvider(Key.get(scopeMap, newHolderAnnotation));
+        binder.<Map<Key<?>, Object>>getProvider(Key.get(scopeMap, newInstanceAnnotation));
     
     binder
-        .bind(ScopeHolder.class)
-        .annotatedWith(multiscope.getHolderAnnotation())
+        .bind(ScopeInstance.class)
+        .annotatedWith(multiscope.getInstanceAnnotation())
         .toProvider(
-            new PrescopedProvider<ScopeHolder>("ScopeHolder should have been bound internally.",
-                scopeAnnotation.getSimpleName()+"-ScopeHolderFakeProvider")).in(scopeAnnotation);
+            new PrescopedProvider<ScopeInstance>("ScopeInstance should have been bound internally.",
+                scopeAnnotation.getSimpleName()+"-ScopeInstanceFakeProvider")).in(scopeAnnotation);
 
-    binder.bind(ScopeHolder.class).annotatedWith(newHolderAnnotation)
-        .toProvider(new Provider<ScopeHolder>() {
+    binder.bind(ScopeInstance.class).annotatedWith(newInstanceAnnotation)
+        .toProvider(new Provider<ScopeInstance>() {
 
 
           @Override
-          public ScopeHolder get() {
-            return multiscope.createScopeHolder(mapProvider.get());
+          public ScopeInstance get() {
+            return multiscope.createScopeInstance(mapProvider.get());
           }
 
           @Override
           public String toString() {
-            return scopeAnnotation.getSimpleName() + "-NewScopeHolderProvider";
+            return scopeAnnotation.getSimpleName() + "-NewScopeInstanceProvider";
           }
         });
   }

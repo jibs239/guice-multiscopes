@@ -20,16 +20,20 @@
  ******************************************************************************/
 package org.protobee.guice;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Test;
 import org.protobee.guice.example.ExamplesGuiceModule;
 import org.protobee.guice.example.scoped.CommandDeck;
 import org.protobee.guice.example.scopes.BattlestarScope;
-import org.protobee.guice.example.scopes.BattlestarScopeHolder;
+import org.protobee.guice.example.scopes.BattlestarScopeInstance;
 import org.protobee.guice.example.scopes.ExampleScopes;
-import org.protobee.guice.example.scopes.NewBattlestarScopeHolder;
+import org.protobee.guice.example.scopes.NewBattlestarScopeInstance;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -46,30 +50,120 @@ public class InternalTests {
   }
 
   @Test
-  public void testNewHolder() {
+  public void testScopeHolder() {
     Injector inj = Guice.createInjector(new ExamplesGuiceModule());
 
-    ScopeHolder holder =
-        inj.getInstance(Key.get(ScopeHolder.class, NewBattlestarScopeHolder.class));
-    assertFalse(holder.isInScope());
+    ScopeInstance instance =
+        inj.getInstance(Key.get(ScopeInstance.class, NewBattlestarScopeInstance.class));
+    assertFalse(instance.isInScope());
 
-    CommandDeck deck;
     try {
-      holder.enterScope();
-      assertTrue(holder.isInScope());
-      assertEquals(holder, inj.getInstance(Key.get(ScopeHolder.class, BattlestarScopeHolder.class)));
-
-      deck = inj.getInstance(CommandDeck.class);
-      assertTrue(deck == inj.getInstance(CommandDeck.class));
-      holder.exitScope();
-      holder.enterScope();
-      assertTrue(deck == inj.getInstance(CommandDeck.class));
-
+      instance.enterScope();
+      assertTrue(instance.isInScope());
+      assertEquals(instance, inj.getInstance(Key.get(ScopeInstance.class, BattlestarScopeInstance.class)));
     } finally {
-      holder.exitScope();
+      instance.exitScope();
     }
 
-    assertFalse(holder.isInScope());
+    assertFalse(instance.isInScope());
+
+    ScopeInstance instance2 =
+        inj.getInstance(Key.get(ScopeInstance.class, NewBattlestarScopeInstance.class));
+
+    assertNotSame(instance, instance2);
+  }
+
+  @Test
+  public void testBasicScoping() {
+    Injector inj = Guice.createInjector(new ExamplesGuiceModule());
+
+    ScopeInstance instance =
+        inj.getInstance(Key.get(ScopeInstance.class, NewBattlestarScopeInstance.class));
+
+    try {
+      instance.enterScope();
+      CommandDeck deck = inj.getInstance(CommandDeck.class);
+      assertNotNull(deck);
+      assertTrue(deck == inj.getInstance(CommandDeck.class));
+      instance.exitScope();
+      instance.enterScope();
+      assertTrue(deck == inj.getInstance(CommandDeck.class));
+    } finally {
+      instance.exitScope();
+    }
+  }
+  
+  @Test
+  public void testTwoScopeInstances() {
+    Injector inj = Guice.createInjector(new ExamplesGuiceModule());
+
+    ScopeInstance instance =
+        inj.getInstance(Key.get(ScopeInstance.class, NewBattlestarScopeInstance.class));
+    ScopeInstance instance2 =
+      inj.getInstance(Key.get(ScopeInstance.class, NewBattlestarScopeInstance.class));
+    
+    CommandDeck deck;
+    try {
+      instance.enterScope();
+      deck = inj.getInstance(CommandDeck.class);
+      assertNotNull(deck);
+    } finally {
+      instance.exitScope();
+    }
+    
+    try {
+      instance2.enterScope();
+      assertNotSame(deck, inj.getInstance(CommandDeck.class));
+    } finally {
+      instance2.exitScope();
+    } 
+  }
+
+  @Test
+  public void testExceptionOnPreviouslyEnteredScope() {
+    Injector inj = Guice.createInjector(new ExamplesGuiceModule());
+
+    ScopeInstance instance =
+        inj.getInstance(Key.get(ScopeInstance.class, NewBattlestarScopeInstance.class));
+
+    boolean caught = false;
+    try {
+      instance.enterScope();
+      instance.enterScope();
+    } catch (IllegalStateException e) {
+      caught = true;
+    } finally {
+      instance.exitScope();
+    }
+    assertTrue(caught);
+
+
+    ScopeInstance instance2 =
+        inj.getInstance(Key.get(ScopeInstance.class, NewBattlestarScopeInstance.class));
+
+    caught = false;
+    try {
+      instance.enterScope();
+      instance2.enterScope();
+    } catch (IllegalStateException e) {
+      caught = true;
+    } finally {
+      instance.exitScope();
+    }
+    assertTrue(caught);
+  }
+
+  @Test
+  public void testExceptionWhenOutOfScope() {
+    Injector inj = Guice.createInjector(new ExamplesGuiceModule());
+
+    boolean caught = false;
+    try {
+      inj.getInstance(CommandDeck.class);
+    } catch (ProvisionException e) {
+      caught = true;
+    }
+    assertTrue(caught);
   }
 
   @BattlestarScope
@@ -87,17 +181,17 @@ public class InternalTests {
       }
     });
 
-    ScopeHolder holder =
-        inj.getInstance(Key.get(ScopeHolder.class, NewBattlestarScopeHolder.class));
+    ScopeInstance instance =
+        inj.getInstance(Key.get(ScopeInstance.class, NewBattlestarScopeInstance.class));
 
     Captain captain = new Captain();
-    holder.putInScope(Key.get(Captain.class), captain);
+    instance.putInScope(Key.get(Captain.class), captain);
 
     try {
-      holder.enterScope();
+      instance.enterScope();
       assertEquals(captain, inj.getInstance(Captain.class));
     } finally {
-      holder.exitScope();
+      instance.exitScope();
     }
 
     boolean caught = false;
@@ -105,6 +199,32 @@ public class InternalTests {
       inj.getInstance(Captain.class);
     } catch (ProvisionException e) {
       caught = true;
+    }
+    assertTrue(caught);
+  }
+
+  @Test
+  public void testExceptionWhenNotPrescoped() {
+    Injector inj = Guice.createInjector(new ExamplesGuiceModule(), new AbstractModule() {
+
+      @Override
+      protected void configure() {
+        bind(Captain.class).toProvider(
+            new PrescopedProvider<Captain>("Captain should have been prescoped")).in(
+            BattlestarScope.class);
+      }
+    });
+
+    boolean caught = false;
+    ScopeInstance instance =
+        inj.getInstance(Key.get(ScopeInstance.class, NewBattlestarScopeInstance.class));
+    try {
+      instance.enterScope();
+      inj.getInstance(Captain.class);
+    } catch (ProvisionException e) {
+      caught = true;
+    } finally {
+      instance.exitScope();
     }
     assertTrue(caught);
   }

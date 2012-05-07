@@ -20,10 +20,10 @@
  ******************************************************************************/
 package org.protobee.guice.example;
 
-import org.protobee.guice.ScopeHolder;
+import org.protobee.guice.ScopeInstance;
 import org.protobee.guice.example.scoped.BattlestarFighterRoster;
 import org.protobee.guice.example.scopes.ExampleScopes;
-import org.protobee.guice.example.scopes.NewFighterScopeHolder;
+import org.protobee.guice.example.scopes.NewFighterScopeInstance;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
@@ -39,12 +39,12 @@ import com.google.inject.Singleton;
 @Singleton
 public class FighterFactory {
 
-  private final Provider<ScopeHolder> scopeProvider;
+  private final Provider<ScopeInstance> scopeProvider;
   private final Provider<Fighter> fighterProvider;
   private final Provider<BattlestarFighterRoster> rosterProvider;
 
   @Inject
-  public FighterFactory(@NewFighterScopeHolder Provider<ScopeHolder> scopeProvider,
+  public FighterFactory(@NewFighterScopeInstance Provider<ScopeInstance> scopeProvider,
       Provider<Fighter> fighterProvider, Provider<BattlestarFighterRoster> rosterProvider) {
     this.scopeProvider = scopeProvider;
     this.fighterProvider = fighterProvider;
@@ -61,7 +61,7 @@ public class FighterFactory {
   public Fighter create() {
     Preconditions.checkState(ExampleScopes.BATTLESTAR.isInScope(), "Not in Battlestar scope");
 
-    ScopeHolder fighterScope = scopeProvider.get();
+    ScopeInstance fighterScope = scopeProvider.get();
     Fighter fighter;
     try {
       fighterScope.enterScope();

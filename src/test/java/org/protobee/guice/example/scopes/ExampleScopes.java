@@ -22,9 +22,13 @@ package org.protobee.guice.example.scopes;
 
 import org.protobee.guice.Multiscope;
 
+/**
+ * The class that holds our example scope instances.
+ * 
+ * @author Daniel Murphy (daniel@dmurph.com)
+ */
 public final class ExampleScopes {
   public static final Multiscope BATTLESTAR = new Multiscope("BATTLESTAR",
-      BattlestarScopeHolder.class);
-  
-  public static final Multiscope FIGHTER = new Multiscope("FIGHTER", FighterScopeHolder.class);
+      BattlestarScopeInstance.class);
+  public static final Multiscope FIGHTER = new Multiscope("FIGHTER", FighterScopeInstance.class);
 }

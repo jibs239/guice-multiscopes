@@ -20,8 +20,8 @@
  ******************************************************************************/
 package org.protobee.guice.example;
 
-import org.protobee.guice.ScopeHolder;
-import org.protobee.guice.example.scopes.NewBattlestarScopeHolder;
+import org.protobee.guice.ScopeInstance;
+import org.protobee.guice.example.scopes.NewBattlestarScopeInstance;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -35,11 +35,11 @@ import com.google.inject.Singleton;
 @Singleton
 public class BattlestarFactory {
 
-  private final Provider<ScopeHolder> scopeProvider;
+  private final Provider<ScopeInstance> scopeProvider;
   private final Provider<Battlestar> battlestarProvider;
 
   @Inject
-  public BattlestarFactory(@NewBattlestarScopeHolder Provider<ScopeHolder> scopeProvider,
+  public BattlestarFactory(@NewBattlestarScopeInstance Provider<ScopeInstance> scopeProvider,
       Provider<Battlestar> battlestarProvider) {
     this.scopeProvider = scopeProvider;
     this.battlestarProvider = battlestarProvider;
@@ -53,7 +53,7 @@ public class BattlestarFactory {
    */
   public Battlestar create() {
 
-    ScopeHolder battlestarScope = scopeProvider.get();
+    ScopeInstance battlestarScope = scopeProvider.get();
     Battlestar model;
     try {
       battlestarScope.enterScope();

@@ -26,14 +26,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.protobee.guice.ScopeHolder;
+import org.protobee.guice.ScopeInstance;
 
 import com.google.inject.BindingAnnotation;
 
 /**
- * Specifies a new {@link ScopeHolder} for the {@link FighterScope} (basically a new
- * {@link FighterScope} is created). Also specifies a new scope map for the
- * {@link FighterScope}.
+ * Specifies a new {@link ScopeInstance} for the {@link BattlestarScope}. Also specifies a new scope
+ * storage map for the {@link BattlestarScope}.
  * 
  * @author Daniel Murphy (daniel@dmurph.com)
  */
@@ -41,4 +40,4 @@ import com.google.inject.BindingAnnotation;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
 @BindingAnnotation
-public @interface NewFighterScopeHolder {}
+public @interface NewBattlestarScopeInstance {}

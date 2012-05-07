@@ -29,8 +29,8 @@ import org.protobee.guice.example.scoped.Pilot;
 import org.protobee.guice.example.scopes.BattlestarScope;
 import org.protobee.guice.example.scopes.ExampleScopes;
 import org.protobee.guice.example.scopes.FighterScope;
-import org.protobee.guice.example.scopes.NewBattlestarScopeHolder;
-import org.protobee.guice.example.scopes.NewFighterScopeHolder;
+import org.protobee.guice.example.scopes.NewBattlestarScopeInstance;
+import org.protobee.guice.example.scopes.NewFighterScopeInstance;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
@@ -39,8 +39,8 @@ public class ExamplesGuiceModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bindMultiscope(binder(), ExampleScopes.BATTLESTAR, BattlestarScope.class, NewBattlestarScopeHolder.class);
-    bindMultiscope(binder(), ExampleScopes.FIGHTER, FighterScope.class, NewFighterScopeHolder.class);
+    bindMultiscope(binder(), ExampleScopes.BATTLESTAR, BattlestarScope.class, NewBattlestarScopeInstance.class);
+    bindMultiscope(binder(), ExampleScopes.FIGHTER, FighterScope.class, NewFighterScopeInstance.class);
     
     bind(BattlestarFighterRoster.class).in(BattlestarScope.class);
     bind(CommandDeck.class).in(BattlestarScope.class);

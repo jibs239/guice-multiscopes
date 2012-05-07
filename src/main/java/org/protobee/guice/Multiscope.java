@@ -31,16 +31,28 @@ import com.google.inject.Provider;
 import com.google.inject.Scope;
 
 /**
- * A scope that supports multiple instances of the scope itself. Scope instances are created by
- * calling {@link #createScopeHolder()} or {@link #createScopeHolder(Map)}. This holder is then used
- * to enter and exit the scope.
+ * A scope that supports multiple instances of the scope itself. After binding your multiscope with
+ * {@link Multiscopes#bindMultiscope(com.google.inject.Binder, Multiscope, Class, Class)} or
+ * {@link Multiscopes#bindMultiscope(com.google.inject.Binder, Multiscope, Class, Class, Class)},
+ * you can create new instances of your scope by injecting a {@link ScopeInstance} annotated with
+ * the annotation 'newInstanceAnnotation' given when you bind this scope. This instance is then used
+ * to enter and exit the scope.<br/>
+ * <br/>
+ * So there are two annotations at work here, the 'scope instance' binding annotation and the 'new
+ * scope instance' binding annotation. The 'new scope instance' annotation is to specify the
+ * creation of a new {@link ScopeInstance} for the corresponding scope. When the new
+ * {@link ScopeInstance} is created, it is is also bound in that scope with the 'scope instance'
+ * annotation. This allows objects to inject the scope instance of the current scope. This is used
+ * when making {@link ScopeInstance} holder classes, which is outlined in the wiki <a
+ * href="http://code.google.com/p/guice-multiscopes/wiki/BestPractices">Best Practices</a> page, and
+ * shown in the examples.
  * 
  * @author Daniel Murphy (daniel@dmurph.com)
  */
 public class Multiscope implements Scope {
 
   /** A sentinel attribute value representing null. */
-  public static enum NullObject {
+  private static enum NullObject {
     INSTANCE
   }
 
@@ -51,18 +63,28 @@ public class Multiscope implements Scope {
   private final AtomicInteger scopeCounter = new AtomicInteger(0);
 
   private final String uniqueName;
-  private final Class<? extends Annotation> holderAnnotation;
+  private final Class<? extends Annotation> instanceAnnotation;
 
-  public Multiscope(String uniqueName, Class<? extends Annotation> holderAnnotation) {
+  /**
+   * Constructs a multiscope with the given name and instance binding annotation, which is used to
+   * specify the {@link ScopeInstance} instance in it's scope.
+   * 
+   * @param uniqueName
+   * @param instanceAnnotation
+   */
+  public Multiscope(String uniqueName, Class<? extends Annotation> instanceAnnotation) {
     Preconditions.checkNotNull(uniqueName);
-    Preconditions.checkNotNull(holderAnnotation);
+    Preconditions.checkNotNull(instanceAnnotation);
 
     this.uniqueName = uniqueName;
-    this.holderAnnotation = holderAnnotation;
+    this.instanceAnnotation = instanceAnnotation;
   }
 
-  public Class<? extends Annotation> getHolderAnnotation() {
-    return holderAnnotation;
+  /**
+   * Gets the annotation used to specify the scope instance
+   */
+  public Class<? extends Annotation> getInstanceAnnotation() {
+    return instanceAnnotation;
   }
 
   @Override
@@ -131,17 +153,17 @@ public class Multiscope implements Scope {
   }
 
   /**
-   * Creates a new scope holder for this scope and adds the holder to the scope (annotated by the
-   * holder annotation for this scope). Uses the given scope map.
+   * Creates a new scope instance for this scope and adds the instance to the scope (annotated by
+   * the instance annotation for this scope). Uses the given scope map.
    * 
    * @param scopeMap the map to use for storing scoped objects. This map should not be persisted and
    *        used otherwise, the only reason it's an argument is because of the injection limitations
    *        for scopes.
-   * @return the scope holder
+   * @return the scope instance
    */
-  protected ScopeHolder createScopeHolder(final Map<Key<?>, Object> scopeMap) {
-    final int holderId = scopeCounter.getAndIncrement();
-    ScopeHolder holder = new ScopeHolder() {
+  protected ScopeInstance createScopeInstance(final Map<Key<?>, Object> scopeMap) {
+    final int instanceId = scopeCounter.getAndIncrement();
+    ScopeInstance instance = new ScopeInstance() {
 
       @Override
       public boolean isInScope() {
@@ -170,18 +192,18 @@ public class Multiscope implements Scope {
       }
 
       @Override
-      public int getHolderId() {
-        return holderId;
+      public int getInstanceId() {
+        return instanceId;
       }
 
       @Override
       public String toString() {
-        return "{ holderId: " + holderId + ", scope: " + uniqueName + "}";
+        return "{ instanceId: " + instanceId + ", scope: " + uniqueName + "}";
       }
     };
 
-    holder.putInScope(Key.get(ScopeHolder.class, holderAnnotation), holder);
-    return holder;
+    instance.putInScope(Key.get(ScopeInstance.class, instanceAnnotation), instance);
+    return instance;
   }
 
   static void putObjectInScope(Key<?> key, Object object, Map<Key<?>, Object> map) {

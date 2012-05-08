@@ -20,7 +20,9 @@
  ******************************************************************************/
 package org.protobee.guice;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -78,7 +80,7 @@ public class SingleScopeExampleTests extends AbstractMultiscopeTest {
       deck1 = injector.getInstance(CommandDeck.class);
       deck1.setCapacity(10);
       deck1.setName("Deck1");
-
+      
     } finally {
       battlestar1.exitScope();
     }
@@ -89,7 +91,7 @@ public class SingleScopeExampleTests extends AbstractMultiscopeTest {
       deck2 = injector.getInstance(CommandDeck.class);
       deck2.setCapacity(12);
       deck2.setName("Deck2");
-
+      assertNotSame(deck1, deck2);
     } finally {
       battlestar2.exitScope();
     }
@@ -98,6 +100,7 @@ public class SingleScopeExampleTests extends AbstractMultiscopeTest {
       battlestar1.enterScope();
       CommandDeck deck = injector.getInstance(CommandDeck.class);
       assertSame(deck1, deck);
+      assertEquals("Deck1", deck.getName());
     } finally {
       battlestar1.exitScope();
     }
@@ -106,6 +109,7 @@ public class SingleScopeExampleTests extends AbstractMultiscopeTest {
       battlestar2.enterScope();
       CommandDeck deck = injector.getInstance(CommandDeck.class);
       assertSame(deck2, deck);
+      assertEquals("Deck2", deck.getName());
     } finally {
       battlestar2.exitScope();
     }

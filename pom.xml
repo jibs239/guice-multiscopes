@@ -7,7 +7,7 @@
   </parent>
   <groupId>org.protobee.guice</groupId>
   <artifactId>guice-multiscopes</artifactId>
-  <version>0.1</version>
+  <version>0.2-SNAPSHOT</version>
   <name>guice-multiscopes</name>
   <description>multi-instance guice scopes with multithreaded access</description>
   <url>http://code.google.com/p/guice-multiscopes</url>

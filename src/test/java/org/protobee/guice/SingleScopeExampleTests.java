@@ -89,9 +89,9 @@ public class SingleScopeExampleTests extends AbstractMultiscopeTest {
     try {
       battlestar2.enterScope();
       deck2 = injector.getInstance(CommandDeck.class);
+      assertNotSame(deck1, deck2);
       deck2.setCapacity(12);
       deck2.setName("Deck2");
-      assertNotSame(deck1, deck2);
     } finally {
       battlestar2.exitScope();
     }

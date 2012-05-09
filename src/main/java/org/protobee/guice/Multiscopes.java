@@ -107,7 +107,6 @@ public final class Multiscopes {
     binder.bind(ScopeInstance.class).annotatedWith(newInstanceAnnotation)
         .toProvider(new Provider<ScopeInstance>() {
 
-
           @Override
           public ScopeInstance get() {
             return multiscope.createScopeInstance(mapProvider.get());

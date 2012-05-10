@@ -174,12 +174,13 @@ public class Multiscope implements Scope {
 
       @Override
       public void enterScope() throws IllegalStateException {
-        Preconditions.checkState(scopeContext.get() == null, "Already in " + uniqueName + " scope");
+        Preconditions.checkState(scopeContext.get() == null, "Already in " + uniqueName + " scope.");
         scopeContext.set(scopeMap);
       }
 
       @Override
       public void putInScope(Key<?> key, Object object) {
+        Preconditions.checkNotNull(key, "key");
         putObjectInScope(key, object, scopeMap);
       }
 

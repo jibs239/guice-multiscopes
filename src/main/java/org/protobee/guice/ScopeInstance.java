@@ -20,6 +20,8 @@
  ******************************************************************************/
 package org.protobee.guice;
 
+import javax.annotation.Nullable;
+
 import com.google.inject.Key;
 
 /**
@@ -57,8 +59,9 @@ public interface ScopeInstance {
    * @param key
    * @param object
    * @throws IllegalArgumentException if the key does not match the object
+   * @throws NullPointerException if the key is null
    */
-  void putInScope(Key<?> key, Object object) throws IllegalArgumentException;
+  void putInScope(Key<?> key, @Nullable Object object) throws IllegalArgumentException;
 
   /**
    * @return the unique id of this instance in it's respective scope

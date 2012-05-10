@@ -59,7 +59,6 @@ public class Multiscope implements Scope {
   private final ThreadLocal<Map<Key<?>, Object>> scopeContext =
       new ThreadLocal<Map<Key<?>, Object>>();
 
-  private final Object scopeLock = new Object();
   private final AtomicInteger scopeCounter = new AtomicInteger(0);
 
   private final String uniqueName;
@@ -147,9 +146,7 @@ public class Multiscope implements Scope {
    * Makes sure this scope is not entered on the current thread.
    */
   public void exitScope() {
-    synchronized (scopeLock) {
-      scopeContext.set(null);
-    }
+    scopeContext.set(null);
   }
 
   /**
@@ -172,18 +169,13 @@ public class Multiscope implements Scope {
 
       @Override
       public void exitScope() {
-        synchronized (scopeLock) {
-          scopeContext.set(null);
-        }
+        scopeContext.set(null);
       }
 
       @Override
       public void enterScope() throws IllegalStateException {
-        synchronized (scopeLock) {
-          Preconditions.checkState(scopeContext.get() == null, "Already in " + uniqueName
-              + " scope");
-          scopeContext.set(scopeMap);
-        }
+        Preconditions.checkState(scopeContext.get() == null, "Already in " + uniqueName + " scope");
+        scopeContext.set(scopeMap);
       }
 
       @Override

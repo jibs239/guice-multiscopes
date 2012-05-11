@@ -18,7 +18,7 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package org.protobee.guice;
+package org.protobee.guice.test.example;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.protobee.guice.example.Battlestar;
 import org.protobee.guice.example.BattlestarFactory;
 import org.protobee.guice.example.scoped.CommandDeck;
+import org.protobee.guice.test.AbstractMultiscopeTest;
 
 import com.google.inject.ProvisionException;
 

@@ -18,12 +18,28 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package org.protobee.guice;
+package org.protobee.guice.test;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import org.junit.After;
+import org.junit.Before;
+import org.protobee.guice.example.ExamplesGuiceModule;
+import org.protobee.guice.example.scopes.ExampleScopes;
 
-@RunWith(Suite.class)
-@SuiteClasses({InternalTests.class, MultipleScopeExampleTests.class, SingleScopeExampleTests.class})
-public class MultiscopeTestSuite {}
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
+public class AbstractMultiscopeTest {
+
+  protected Injector injector;
+  
+  @Before
+  public void init() {
+    injector = Guice.createInjector(new ExamplesGuiceModule());
+  }
+  
+  @After
+  public void clearScopes() {
+    ExampleScopes.BATTLESTAR.exitScope();
+    ExampleScopes.FIGHTER.exitScope();
+  }
+}

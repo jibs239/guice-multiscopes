@@ -22,7 +22,7 @@ import com.google.inject.spi.Toolable;
 
 public abstract class BoundedMultiscopeBinder extends MultiscopeBinder {
 
-  public static BoundedMultiscopeBinder createBoundedMultiscope(final Binder binder,
+  public static BoundedMultiscopeBinder newBoundedBinder(final Binder binder,
       final Class<? extends Annotation> scopeAnnotation,
       final Class<? extends Annotation> scopeBindingAnnotation) {
     RealBoundedMultiscopeBinder mbinder =
@@ -55,6 +55,7 @@ public abstract class BoundedMultiscopeBinder extends MultiscopeBinder {
 
     @Override
     public void configure(Binder binder) {
+      binder.bindScope(scopeAnnotation, multiscope);
       binder
           .bind(ScopeInstance.class)
           .annotatedWith(multiscope.getBindingAnnotation())
@@ -64,8 +65,8 @@ public abstract class BoundedMultiscopeBinder extends MultiscopeBinder {
                       .getSimpleName() + "-ScopeInstanceFakeProvider")).in(scopeAnnotation);
       binder.bind(Multiscope.class).annotatedWith(scopeBindingAnnotation).toInstance(multiscope);
 
-      Multibinder<Multiscope> exiters = Multibinder.newSetBinder(binder, Multiscope.class);
-      exiters.addBinding().toInstance(multiscope);
+      Multibinder<Multiscope> scopes = Multibinder.newSetBinder(binder, Multiscope.class);
+      scopes.addBinding().toInstance(multiscope);
     }
 
     @Override
@@ -74,12 +75,16 @@ public abstract class BoundedMultiscopeBinder extends MultiscopeBinder {
           .bind(ScopeInstance.class)
           .annotatedWith(instanceAnnotation)
           .toProvider(
-              new NewAssistedInstanceProvider(scopeBindingAnnotation, multiscope,
+              new PrescopingSingletonInstanceProvider(scopeBindingAnnotation, multiscope,
                   instanceAnnotation));
 
       Multibinder<ScopeInstance> instances =
           Multibinder.newSetBinder(binder, ScopeInstance.class, scopeBindingAnnotation);
       instances.addBinding().to(Key.get(ScopeInstance.class, instanceAnnotation));
+
+      // set up for prescoped keys
+      TypeLiteral<Key<?>> keyType = new TypeLiteral<Key<?>>() {};
+      Multibinder.newSetBinder(binder, keyType, instanceAnnotation);
       return this;
     }
 
@@ -98,7 +103,7 @@ public abstract class BoundedMultiscopeBinder extends MultiscopeBinder {
       };
       return instance;
     }
-    
+
     @Override
     public boolean equals(Object o) {
       return o instanceof RealBoundedMultiscopeBinder
@@ -116,7 +121,10 @@ public abstract class BoundedMultiscopeBinder extends MultiscopeBinder {
           .bind(Key.get(new TypeLiteral<Map<Key<?>, Object>>() {}, scopeBindingAnnotation));
     }
 
-    static class NewAssistedInstanceProvider implements Provider<ScopeInstance>, HasDependencies {
+    static class PrescopingSingletonInstanceProvider
+        implements
+          Provider<ScopeInstance>,
+          HasDependencies {
 
       final Class<? extends Annotation> scopeInstanceAnnotation;
       final Class<? extends Annotation> scopeBindingAnnotation;
@@ -124,11 +132,14 @@ public abstract class BoundedMultiscopeBinder extends MultiscopeBinder {
 
       ImmutableSet<Binding<?>> instanceToKeysBindings;
 
+      volatile ScopeInstance instance = null;
+      final Object instanceLock = new Object();
+
       Binding<Map<Key<?>, Object>> scopeMapBinding = null;
       Set<Dependency<?>> dependencies = Sets.newHashSet();
       boolean initialized = false;
 
-      NewAssistedInstanceProvider(Class<? extends Annotation> scopeBindingAnnotation,
+      PrescopingSingletonInstanceProvider(Class<? extends Annotation> scopeBindingAnnotation,
           AbstractMultiscope multiscope, Class<? extends Annotation> scopeInstanceAnnotation) {
         this.scopeBindingAnnotation = scopeBindingAnnotation;
         this.multiscope = multiscope;
@@ -171,16 +182,26 @@ public abstract class BoundedMultiscopeBinder extends MultiscopeBinder {
 
       @Override
       public ScopeInstance get() {
-        Map<Key<?>, Object> scopeMap;
-        if (scopeMapBinding != null) {
-          scopeMap = scopeMapBinding.getProvider().get();
-        } else {
-          scopeMap = MultiscopeUtils.createDefaultScopeMap();
+        if (instance != null) {
+          return instance;
         }
-        for (Binding<?> prescoped : instanceToKeysBindings) {
-          scopeMap.put(prescoped.getKey(), prescoped.getProvider().get());
+        synchronized (instanceLock) {
+          if (instance != null) {
+            return instance;
+          }
+
+          Map<Key<?>, Object> scopeMap;
+          if (scopeMapBinding != null) {
+            scopeMap = scopeMapBinding.getProvider().get();
+          } else {
+            scopeMap = MultiscopeUtils.createDefaultScopeMap();
+          }
+          for (Binding<?> prescoped : instanceToKeysBindings) {
+            scopeMap.put(prescoped.getKey(), prescoped.getProvider().get());
+          }
+          instance = multiscope.createScopeInstance(scopeMap);
+          return instance;
         }
-        return multiscope.createScopeInstance(scopeMap);
       }
 
       @Override

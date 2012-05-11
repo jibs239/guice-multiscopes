@@ -64,7 +64,7 @@ public final class Multiscopes {
    * @param newScopeInstanceAnnotation the annotation for creating a new scope instance (and a new
    *        scope map)
    */
-  public static void bindMultiscope(final Binder binder, final AbstractMultiscope multiscope,
+  public static void bindMultiscope(final Binder binder, final Multiscope multiscope,
       final Class<? extends Annotation> scopeAnnotation,
       final Class<? extends Annotation> newScopeInstanceAnnotation) {
     bindMultiscope(binder, multiscope, scopeAnnotation, newScopeInstanceAnnotation,
@@ -84,7 +84,7 @@ public final class Multiscopes {
    * @param scopeMapProvider the provider for the scope map. If you're accessing your scoped
    *        concurrently, this map should be threadsafe.
    */
-  public static void bindMultiscope(final Binder binder, final AbstractMultiscope multiscope,
+  public static void bindMultiscope(final Binder binder, final Multiscope multiscope,
       final Class<? extends Annotation> scopeAnnotation,
       final Class<? extends Annotation> newInstanceAnnotation,
       final Class<? extends Provider<Map<Key<?>, Object>>> scopeMapProvider) {

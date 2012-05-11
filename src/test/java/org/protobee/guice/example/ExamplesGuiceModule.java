@@ -20,7 +20,6 @@
  ******************************************************************************/
 package org.protobee.guice.example;
 
-import org.protobee.guice.MultiscopeBinder;
 import org.protobee.guice.Multiscopes;
 import org.protobee.guice.example.scoped.BattlestarFighterRoster;
 import org.protobee.guice.example.scoped.CommandDeck;
@@ -34,7 +33,6 @@ import org.protobee.guice.example.scopes.NewFighterScopeInstance;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
-import com.google.inject.multibindings.Multibinder;
 
 public class ExamplesGuiceModule extends AbstractModule {
 

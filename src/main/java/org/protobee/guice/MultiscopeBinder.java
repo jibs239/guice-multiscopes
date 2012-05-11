@@ -4,7 +4,6 @@ import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
@@ -22,15 +21,7 @@ import com.google.inject.spi.Toolable;
 
 public abstract class MultiscopeBinder {
 
-  static void bindScopeMap(Binder binder, Class<? extends Annotation> scopeBindingAnnotation,
-      Provider<Map<Key<?>, Object>> mapProvider) {
-    binder.bind(
-        Key.get(new TypeLiteral<Map<Key<?>, Object>>() {},
-            Preconditions.checkNotNull(scopeBindingAnnotation, "scopeBindingAnnotation")))
-        .toProvider(Preconditions.checkNotNull(mapProvider, "mapProvider"));
-  }
-
-  public static MultiscopeBinder createMultiscopeModule(Binder binder,
+  public static MultiscopeBinder newBinder(Binder binder,
       final Class<? extends Annotation> scopeAnnotation,
       final Class<? extends Annotation> scopeBindingAnnotation,
       final Class<? extends Annotation> newScopeBindingAnnotation) {
@@ -58,7 +49,7 @@ public abstract class MultiscopeBinder {
       this.scopeAnnotation = scopeAnnotation;
       this.scopeBindingAnnotation = scopeBindingAnnotation;
       this.newScopeBindingAnnotation = newScopeBindingAnnotation;
-      this.multiscope = new DynamicMultiscope(scopeBindingAnnotation);
+      this.multiscope = new SimpleMultiscope(scopeBindingAnnotation);
     }
 
     @Override
@@ -75,8 +66,8 @@ public abstract class MultiscopeBinder {
                       .getSimpleName() + "-ScopeInstanceFakeProvider")).in(scopeAnnotation);
       binder.bind(Multiscope.class).annotatedWith(scopeBindingAnnotation).toInstance(multiscope);
 
-      Multibinder<Multiscope> exiters = Multibinder.newSetBinder(binder, Multiscope.class);
-      exiters.addBinding().toInstance(multiscope);
+      Multibinder<Multiscope> scopes = Multibinder.newSetBinder(binder, Multiscope.class);
+      scopes.addBinding().toInstance(multiscope);
     }
 
     @Override

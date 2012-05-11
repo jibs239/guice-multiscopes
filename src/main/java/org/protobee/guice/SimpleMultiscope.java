@@ -27,9 +27,9 @@ import com.google.inject.Key;
 import com.google.inject.OutOfScopeException;
 import com.google.inject.Provider;
 
-public class DynamicMultiscope extends AbstractMultiscope {
+public class SimpleMultiscope extends AbstractMultiscope {
 
-  public DynamicMultiscope(Class<? extends Annotation> instanceAnnotation) {
+  public SimpleMultiscope(Class<? extends Annotation> instanceAnnotation) {
     super(instanceAnnotation);
   }
 

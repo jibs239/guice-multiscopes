@@ -18,7 +18,7 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package org.protobee.guice;
+package org.protobee.guice.test.example;
 
 import static org.junit.Assert.*;
 
@@ -27,6 +27,7 @@ import org.protobee.guice.example.Battlestar;
 import org.protobee.guice.example.BattlestarFactory;
 import org.protobee.guice.example.Fighter;
 import org.protobee.guice.example.FighterFactory;
+import org.protobee.guice.test.AbstractMultiscopeTest;
 
 public class MultipleScopeExampleTests extends AbstractMultiscopeTest {
 

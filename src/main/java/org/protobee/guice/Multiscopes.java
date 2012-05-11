@@ -34,9 +34,10 @@ import com.google.inject.TypeLiteral;
  * <ul>
  * <li>A {@link Multiscope} instance
  * <li>A scope annotation, like all scopes
- * <li>A 'new scope instance' binding annotation, used to inject a new {@link ScopeInstance} for
- * the {@link Multiscope} (also to specify a new scope storage map internally)
- * <li>Optionally, a provider for the scope storage map. This defaults to {@link DefaultScopeMapProvider}
+ * <li>A 'new scope instance' binding annotation, used to inject a new {@link ScopeInstance} for the
+ * {@link Multiscope} (also to specify a new scope storage map internally)
+ * <li>Optionally, a provider for the scope storage map. This defaults to
+ * {@link DefaultScopeMapProvider}
  * </ul>
  * 
  * You should be storing your multiscope instances as a <code>public static final</code> variable in
@@ -46,22 +47,24 @@ import com.google.inject.TypeLiteral;
  * 
  * @author Daniel Murphy (daniel@dmurph.com)
  */
+@Deprecated
 public final class Multiscopes {
 
   private Multiscopes() {}
 
   /**
-   * Binds the multiscope to the scope annotation, and binds {@link ScopeInstance} as prescoped in the
-   * scope as well. Creating new scope instances for this multiscope is bound to the
+   * Binds the multiscope to the scope annotation, and binds {@link ScopeInstance} as prescoped in
+   * the scope as well. Creating new scope instances for this multiscope is bound to the
    * newInstanceAnnotation, as well as the scope map provider. This call uses the default
    * {@link DefaultScopeMapProvider}.
    * 
    * @param binder the binder to use
    * @param multiscope the multiscope instance
    * @param scopeAnnotation the scope annotation itself
-   * @param newScopeInstanceAnnotation the annotation for creating a new scope instance (and a new scope map)
+   * @param newScopeInstanceAnnotation the annotation for creating a new scope instance (and a new
+   *        scope map)
    */
-  public static void bindMultiscope(final Binder binder, final Multiscope multiscope,
+  public static void bindMultiscope(final Binder binder, final AbstractMultiscope multiscope,
       final Class<? extends Annotation> scopeAnnotation,
       final Class<? extends Annotation> newScopeInstanceAnnotation) {
     bindMultiscope(binder, multiscope, scopeAnnotation, newScopeInstanceAnnotation,
@@ -69,18 +72,19 @@ public final class Multiscopes {
   }
 
   /**
-   * Binds the multiscope to the scope annotation, and binds {@link ScopeInstance} as prescoped in the
-   * scope as well. Creating new scope instances for this multiscope is bound to the
+   * Binds the multiscope to the scope annotation, and binds {@link ScopeInstance} as prescoped in
+   * the scope as well. Creating new scope instances for this multiscope is bound to the
    * newInstanceAnnotation, as well as the scopeMapProvider.
    * 
    * @param binder the binder to use
    * @param multiscope the multiscope instance
    * @param scopeAnnotation the scope annotation itself
-   * @param newInstanceAnnotation the annotation for creating a new scope instance (and a new scope map)
+   * @param newInstanceAnnotation the annotation for creating a new scope instance (and a new scope
+   *        map)
    * @param scopeMapProvider the provider for the scope map. If you're accessing your scoped
    *        concurrently, this map should be threadsafe.
    */
-  public static void bindMultiscope(final Binder binder, final Multiscope multiscope,
+  public static void bindMultiscope(final Binder binder, final AbstractMultiscope multiscope,
       final Class<? extends Annotation> scopeAnnotation,
       final Class<? extends Annotation> newInstanceAnnotation,
       final Class<? extends Provider<Map<Key<?>, Object>>> scopeMapProvider) {
@@ -91,18 +95,18 @@ public final class Multiscopes {
 
     binder.bindScope(scopeAnnotation, multiscope);
     final TypeLiteral<Map<Key<?>, Object>> scopeMap = new TypeLiteral<Map<Key<?>, Object>>() {};
-    binder.bind(scopeMap).annotatedWith(newInstanceAnnotation)
-        .toProvider(scopeMapProvider);
+    binder.bind(scopeMap).annotatedWith(newInstanceAnnotation).toProvider(scopeMapProvider);
 
     final Provider<Map<Key<?>, Object>> mapProvider =
         binder.<Map<Key<?>, Object>>getProvider(Key.get(scopeMap, newInstanceAnnotation));
-    
+
     binder
         .bind(ScopeInstance.class)
-        .annotatedWith(multiscope.getInstanceAnnotation())
+        .annotatedWith(multiscope.getBindingAnnotation())
         .toProvider(
-            new PrescopedProvider<ScopeInstance>("ScopeInstance should have been bound internally.",
-                scopeAnnotation.getSimpleName()+"-ScopeInstanceFakeProvider")).in(scopeAnnotation);
+            new PrescopedProvider<ScopeInstance>(
+                "ScopeInstance should have been bound internally.", scopeAnnotation.getSimpleName()
+                    + "-ScopeInstanceFakeProvider")).in(scopeAnnotation);
 
     binder.bind(ScopeInstance.class).annotatedWith(newInstanceAnnotation)
         .toProvider(new Provider<ScopeInstance>() {

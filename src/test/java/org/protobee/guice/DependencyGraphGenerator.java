@@ -71,9 +71,6 @@ public class DependencyGraphGenerator {
 
       if (doingExclusion) {
         out = new PrintWriter(new File(filename + "-excluded.dot"), "UTF-8");
-        s = fixGrapherBug(original);
-        s = hideClassPaths(s);
-        s = removeArguments(s);
         for (String string : exclusionClasses) {
           s = removeClass(s, string);
         }
@@ -102,7 +99,7 @@ public class DependencyGraphGenerator {
   }
 
   public static String hideClassPaths(String s) {
-    s = s.replaceAll("\\w[a-z\\d_\\.]+\\.([A-Z][A-Za-z\\d_]*)", "");
+    s = s.replaceAll("([a-z][a-z\\d_]*\\.)+([A-Z][A-Za-z\\d_]*)", "\\2");
     s = s.replaceAll("value=[\\w-]+", "random");
     return s;
   }

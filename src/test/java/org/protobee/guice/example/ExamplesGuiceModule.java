@@ -20,8 +20,8 @@
  ******************************************************************************/
 package org.protobee.guice.example;
 
-import static org.protobee.guice.Multiscopes.bindMultiscope;
-
+import org.protobee.guice.MultiscopeBinder;
+import org.protobee.guice.Multiscopes;
 import org.protobee.guice.example.scoped.BattlestarFighterRoster;
 import org.protobee.guice.example.scoped.CommandDeck;
 import org.protobee.guice.example.scoped.FighterWeapons;
@@ -34,21 +34,24 @@ import org.protobee.guice.example.scopes.NewFighterScopeInstance;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
+import com.google.inject.multibindings.Multibinder;
 
 public class ExamplesGuiceModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bindMultiscope(binder(), ExampleScopes.BATTLESTAR, BattlestarScope.class, NewBattlestarScopeInstance.class);
-    bindMultiscope(binder(), ExampleScopes.FIGHTER, FighterScope.class, NewFighterScopeInstance.class);
-    
+    Multiscopes.bindMultiscope(binder(), ExampleScopes.BATTLESTAR, BattlestarScope.class,
+        NewBattlestarScopeInstance.class);
+    Multiscopes.bindMultiscope(binder(), ExampleScopes.FIGHTER, FighterScope.class,
+        NewFighterScopeInstance.class);
+
     bind(BattlestarFighterRoster.class).in(BattlestarScope.class);
     bind(CommandDeck.class).in(BattlestarScope.class);
     bind(FighterWeapons.class).in(FighterScope.class);
     bind(Pilot.class).in(FighterScope.class);
-    
+
     bind(Descoper.class);
-    
+
     bind(Battlestar.class).in(BattlestarScope.class);
     bind(BattlestarFactory.class).in(Singleton.class);
     bind(Fighter.class).in(FighterScope.class);

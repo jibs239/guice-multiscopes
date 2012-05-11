@@ -22,10 +22,8 @@ package org.protobee.guice.example;
 
 import org.protobee.guice.ScopeInstance;
 import org.protobee.guice.example.scoped.BattlestarFighterRoster;
-import org.protobee.guice.example.scopes.ExampleScopes;
 import org.protobee.guice.example.scopes.NewFighterScopeInstance;
 
-import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -59,7 +57,7 @@ public class FighterFactory {
    * Preconditions: not in a fighter scope, and we need to be in the parent battlestar scope.
    */
   public Fighter create() {
-    Preconditions.checkState(ExampleScopes.BATTLESTAR.isInScope(), "Not in Battlestar scope");
+//    Preconditions.checkState(ExampleScopes.BATTLESTAR.isInScope(), "Not in Battlestar scope");
 
     ScopeInstance fighterScope = scopeProvider.get();
     Fighter fighter;

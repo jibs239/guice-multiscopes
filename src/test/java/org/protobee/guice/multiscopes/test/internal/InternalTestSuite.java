@@ -5,5 +5,5 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({UnboundedTests.class, BoundedTests.class})
+@SuiteClasses({UnboundedTests.class, BoundedTests.class, DescoperTests.class})
 public class InternalTestSuite {}

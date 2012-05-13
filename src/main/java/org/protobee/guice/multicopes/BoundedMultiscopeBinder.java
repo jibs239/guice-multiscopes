@@ -42,6 +42,7 @@ public abstract class BoundedMultiscopeBinder extends MultiscopeBinder {
   public static enum PrescopeType {
     EAGER, LAZY
   }
+  
   public static interface InstancePrescoper {
     <T> InstancePrescoper addInstanceObject(Key<T> key);
 
@@ -73,6 +74,8 @@ public abstract class BoundedMultiscopeBinder extends MultiscopeBinder {
                   "ScopeInstance should have been bound internally.", scopeAnnotation
                       .getSimpleName() + "-ScopeInstanceFakeProvider")).in(scopeAnnotation);
       binder.bind(Multiscope.class).annotatedWith(scopeBindingAnnotation).toInstance(multiscope);
+      binder.bind(Descoper.class).annotatedWith(scopeBindingAnnotation)
+          .toProvider(new DescoperProvider(multiscope));
 
       Multibinder<Multiscope> scopes = Multibinder.newSetBinder(binder, Multiscope.class);
       scopes.addBinding().toInstance(multiscope);

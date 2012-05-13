@@ -19,6 +19,8 @@ public interface Descoper {
 
   /**
    * Re-enters scopes that were exited
+   * 
+   * @throws IllegalStateException if the corresponding scope or scopes are already entered
    */
-  void rescope();
+  void rescope() throws IllegalStateException;
 }

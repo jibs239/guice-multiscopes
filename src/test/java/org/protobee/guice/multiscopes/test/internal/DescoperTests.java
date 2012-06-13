@@ -15,6 +15,7 @@ import org.protobee.guice.multicopes.Descoper;
 import org.protobee.guice.multicopes.MultiscopeBinder;
 import org.protobee.guice.multicopes.MultiscopeExitor;
 import org.protobee.guice.multicopes.ScopeInstance;
+import org.protobee.guice.multicopes.CompleteDescoper;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
@@ -43,6 +44,24 @@ public class DescoperTests {
   @BindingAnnotation
   public static @interface NewTableInstance {}
 
+  // scope binding annotation
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
+  @BindingAnnotation
+  public static @interface Chair {}
+
+  // scope annotation
+  @Target({ElementType.TYPE, ElementType.METHOD})
+  @Retention(RetentionPolicy.RUNTIME)
+  @ScopeAnnotation
+  public static @interface ChairScope {}
+
+  // new scope instance annotation
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
+  @BindingAnnotation
+  public static @interface NewChairInstance {}
+
   @TableScope
   public static class Legs {}
 
@@ -50,6 +69,7 @@ public class DescoperTests {
     @Override
     protected void configure() {
       MultiscopeBinder.newBinder(binder(), TableScope.class, Table.class, NewTableInstance.class);
+      MultiscopeBinder.newBinder(binder(), ChairScope.class, Chair.class, NewChairInstance.class);
     }
   }
 
@@ -84,6 +104,37 @@ public class DescoperTests {
       assertEquals(table, inj.getInstance(Key.get(ScopeInstance.class, Table.class)));
     } finally {
       table.exitScope();
+    }
+  }
+
+  @Test
+  public void testTotalDescoper() {
+    inj = Guice.createInjector(new UnboundedModule());
+
+    ScopeInstance table = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
+    ScopeInstance chair = inj.getInstance(Key.get(ScopeInstance.class, NewChairInstance.class));
+
+    CompleteDescoper descoper = inj.getInstance(CompleteDescoper.class);
+
+    try {
+      table.enterScope();
+      chair.enterScope();
+      assertTrue(table.isInScope());
+      assertTrue(chair.isInScope());
+
+      descoper.descope();
+      assertFalse(table.isInScope());
+      assertFalse(chair.isInScope());
+
+      descoper.rescope();
+      assertTrue(table.isInScope());
+      assertTrue(chair.isInScope());
+
+      assertEquals(table, inj.getInstance(Key.get(ScopeInstance.class, Table.class)));
+      assertEquals(chair, inj.getInstance(Key.get(ScopeInstance.class, Chair.class)));
+    } finally {
+      table.exitScope();
+      chair.exitScope();
     }
   }
 }

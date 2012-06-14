@@ -17,11 +17,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.After;
 import org.junit.Test;
 import org.protobee.guice.multiscopes.BoundedMultiscopeBinder;
+import org.protobee.guice.multiscopes.BoundedMultiscopeBinder.PrescopeType;
 import org.protobee.guice.multiscopes.Multiscope;
 import org.protobee.guice.multiscopes.Multiscopes;
-import org.protobee.guice.multiscopes.PrescopedProvider;
 import org.protobee.guice.multiscopes.ScopeInstance;
-import org.protobee.guice.multiscopes.BoundedMultiscopeBinder.PrescopeType;
 import org.protobee.guice.multiscopes.util.MultiscopeExitor;
 
 import com.google.common.collect.Sets;
@@ -96,8 +95,7 @@ public class BoundedTests {
       boundedScopes.prescopeInstance(Mercury.class).addInstanceObject(
           Key.get(String.class, Mercury.class));
 
-      bind(String.class).annotatedWith(Planet.class).toProvider(new PrescopedProvider<String>())
-          .in(PlanetScope.class);
+      Multiscopes.bindAsPrescoped(binder(), PlanetScope.class, Planet.class, String.class);
     }
   }
 
@@ -184,8 +182,7 @@ public class BoundedTests {
         boundedScopes.prescopeInstance(Mercury.class).addInstanceObject(Key.get(Object.class),
             PrescopeType.LAZY);
 
-        bind(Object.class).annotatedWith(Planet.class).toProvider(new PrescopedProvider<Object>())
-            .in(PlanetScope.class);
+        Multiscopes.bindAsPrescoped(binder(), PlanetScope.class, Planet.class, Object.class);
       }
     });
 

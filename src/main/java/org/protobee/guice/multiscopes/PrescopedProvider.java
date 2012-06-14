@@ -27,7 +27,10 @@ import com.google.inject.ProvisionException;
 
 /**
  * A provider that always throws an exception when {@link #get()} is called. Meant to be used for
- * prescoped bindings.
+ * prescoped bindings (and is used when either
+ * {@link Multiscopes#bindAsPrescoped(com.google.inject.Binder, Class, Class, Class)} or
+ * {@link Multiscopes#bindAsPrescoped(com.google.inject.Binder, Class, Class, com.google.inject.TypeLiteral)}
+ * are called).
  * 
  * @author Daniel Murphy (daniel@dmurph.com)
  */
@@ -66,7 +69,7 @@ public class PrescopedProvider<T> implements Provider<T> {
   @Override
   public String toString() {
     if (description == null) {
-      return super.toString();
+      return "PrescopedProvider";
     }
     return description;
   }

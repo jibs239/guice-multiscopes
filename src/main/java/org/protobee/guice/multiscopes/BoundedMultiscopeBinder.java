@@ -73,7 +73,9 @@ public interface BoundedMultiscopeBinder extends MultiscopeBinder {
   BoundedMultiscopeBinder addInstance(Class<? extends Annotation> instanceAnnotation);
 
   /**
-   * Returns an {@link InstancePrescoper} to prescope the given instance
+   * Returns an {@link InstancePrescoper} to prescope the given instance. This binds arbitrary keys
+   * to the scope instance specified, and will appear when in the specified scope instance and when
+   * using this scope's binding annotation with the key's type (not the instance binding annotation)
    */
   InstancePrescoper prescopeInstance(Class<? extends Annotation> instanceAnnotation);
 }

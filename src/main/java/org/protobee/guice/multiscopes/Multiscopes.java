@@ -51,20 +51,33 @@ import com.google.inject.spi.HasDependencies;
 import com.google.inject.spi.Toolable;
 
 /**
- * Class for binding multiscopes. Each multiscope binding needs
+ * Class for binding multiscopes.<br/>
+ * An unbounded (normal) multiscope binder from {@link #newBinder(Binder, Class, Class, Class)}
+ * needs
  * <ul>
- * <li>A {@link Multiscope} instance
  * <li>A scope annotation, like all scopes
+ * <li>A scope binding annotation, to specify this scope to inject the current {@link ScopeInstance}
  * <li>A 'new scope instance' binding annotation, used to inject a new {@link ScopeInstance} for the
  * {@link Multiscope} (also to specify a new scope storage map internally)
- * <li>Optionally, a provider for the scope storage map. This defaults to
- * {@link DefaultScopeMapProvider}
+ * <li>Optionally, after creation you can specify a provider for the scope storage map. This is
+ * specified from the {@link MultiscopeBinder} after you create it. This defaults to
+ * {@link DefaultScopeMapProvider}.
  * </ul>
- * 
- * You should be storing your multiscope instances as a <code>public static final</code> variable in
- * one of your classes. This way, you can access {@link Multiscope#isInScope()} and
- * {@link Multiscope#exitScope()} for testing and other cases where you need to check or exit the
- * scope when you don't have access to the scope instance itself.
+ * <br/>
+ * A bounded multiscope binder from {@link #newBoundedBinder(Binder, Class, Class)} needs
+ * <ul>
+ * <li>A scope annotation, like all scopes
+ * <li>A scope binding annotation, to specify this scope to inject the current {@link ScopeInstance}
+ * <li>At least one scope instance, specified from the {@link BoundedMultiscopeBinder} (scopes can
+ * be added on various modules, this is similar to the multiset).
+ * <li>Optionally, you can specify a provider for the scope storage map. This is performed on the
+ * {@link MultiscopeBinder} after you create it. This defaults to {@link DefaultScopeMapProvider}.
+ * <li>Optionally, you can prescope keys in bounded scope instances using
+ * {@link BoundedMultiscopeBinder#prescopeInstance(Class)}. This makes the prescoped objects show up
+ * when using the scope binding annotation with the key from the prescoped object. This is used in
+ * conjunction with {@link #bindAsPrescoped(Binder, Class, Class, Class)} or
+ * {@link #bindAsPrescoped(Binder, Class, Class, TypeLiteral)}.
+ * </ul>
  * 
  * @author Daniel Murphy (daniel@dmurph.com)
  */
@@ -76,7 +89,7 @@ public final class Multiscopes {
    * Creates a new {@link MultiscopeBinder}. The scope annotation has be be a
    * {@link ScopeAnnotation}, and the binding annotations have to be {@link BindingAnnotation}s.
    */
-  public static MultiscopeBinder newBinder(Binder binder,
+  public static MultiscopeBinder newBinder(final Binder binder,
       final Class<? extends Annotation> scopeAnnotation,
       final Class<? extends Annotation> scopeBindingAnnotation,
       final Class<? extends Annotation> newScopeBindingAnnotation) {
@@ -105,6 +118,32 @@ public final class Multiscopes {
         new RealBoundedMultiscopeBinder(binder, scopeAnnotation, scopeBindingAnnotation);
     binder.install(mbinder);
     return mbinder;
+  }
+
+  /**
+   * Binds the given class as a prescoped type in the given scope. This tells Guice that we can find
+   * the given type annotated with the scope binding annotation in the given multiscope. This is
+   * used with {@link BoundedMultiscopeBinder#prescopeInstance(Class)}, which is used to specify
+   * where to get the given class for each specific scope instance.
+   */
+  public static <T> void bindAsPrescoped(final Binder binder,
+      final Class<? extends Annotation> scopeAnnotation,
+      final Class<? extends Annotation> scopeBindingAnnotation, final Class<T> prescopedClass) {
+    bindAsPrescoped(binder, scopeAnnotation, scopeBindingAnnotation,
+        TypeLiteral.get(prescopedClass));
+  }
+
+  /**
+   * Binds the given class as a prescoped type in the given scope. This tells Guice that we can find
+   * the given type annotated with the scope binding annotation in the given multiscope. This is
+   * used with {@link BoundedMultiscopeBinder#prescopeInstance(Class)}, which is used to specify
+   * where to get the given class for each specific scope instance.
+   */
+  public static <T> void bindAsPrescoped(final Binder binder,
+      final Class<? extends Annotation> scopeAnnotation,
+      final Class<? extends Annotation> scopeBindingAnnotation, final TypeLiteral<T> prescopedType) {
+    binder.bind(prescopedType).annotatedWith(scopeBindingAnnotation)
+        .toProvider(new PrescopedProvider<T>()).in(scopeAnnotation);
   }
 
   static class RealMultiscopeModule implements MultiscopeBinder, Module {
@@ -294,7 +333,6 @@ public final class Multiscopes {
       final Class<? extends Annotation> scopeInstanceAnnotation;
       final Class<? extends Annotation> scopeBindingAnnotation;
       final Multiscope multiscope;
-
 
       volatile ScopeInstance instance = null;
       final Object instanceLock = new Object();

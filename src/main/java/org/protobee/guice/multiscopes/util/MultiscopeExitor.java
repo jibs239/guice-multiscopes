@@ -25,7 +25,6 @@ import java.util.Set;
 import org.protobee.guice.multiscopes.Multiscope;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Utility to exit all multiscopes.  Helpful in testing.
@@ -35,7 +34,6 @@ import com.google.inject.Singleton;
  * 
  * @author Daniel Murphy (daniel@dmurph.com)
  */
-@Singleton
 public class MultiscopeExitor {
 
   private final Set<Multiscope> multiscopes;

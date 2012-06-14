@@ -35,12 +35,14 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
+import com.google.inject.BindingAnnotation;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
+import com.google.inject.ScopeAnnotation;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.multibindings.Multibinder;
@@ -70,10 +72,18 @@ public final class Multiscopes {
 
   private Multiscopes() {}
 
+  /**
+   * Creates a new {@link MultiscopeBinder}. The scope annotation has be be a
+   * {@link ScopeAnnotation}, and the binding annotations have to be {@link BindingAnnotation}s.
+   */
   public static MultiscopeBinder newBinder(Binder binder,
       final Class<? extends Annotation> scopeAnnotation,
       final Class<? extends Annotation> scopeBindingAnnotation,
       final Class<? extends Annotation> newScopeBindingAnnotation) {
+    Preconditions.checkNotNull(binder, "binder");
+    Preconditions.checkNotNull(scopeAnnotation, "scopeAnnotation");
+    Preconditions.checkNotNull(scopeBindingAnnotation, "scopeBindingAnnotation");
+    Preconditions.checkNotNull(newScopeBindingAnnotation, "newScopeBindingAnnotation");
     RealMultiscopeModule real =
         new RealMultiscopeModule(binder, scopeAnnotation, scopeBindingAnnotation,
             newScopeBindingAnnotation);
@@ -81,9 +91,16 @@ public final class Multiscopes {
     return real;
   }
 
+  /**
+   * Creates a new {@link BoundedMultiscopeBinder}. The scope annotation has be be a
+   * {@link ScopeAnnotation}, and the binding annotation has to be a {@link BindingAnnotation}.
+   */
   public static BoundedMultiscopeBinder newBoundedBinder(final Binder binder,
       final Class<? extends Annotation> scopeAnnotation,
       final Class<? extends Annotation> scopeBindingAnnotation) {
+    Preconditions.checkNotNull(binder, "binder");
+    Preconditions.checkNotNull(scopeAnnotation, "scopeAnnotation");
+    Preconditions.checkNotNull(scopeBindingAnnotation, "scopeBindingAnnotation");
     RealBoundedMultiscopeBinder mbinder =
         new RealBoundedMultiscopeBinder(binder, scopeAnnotation, scopeBindingAnnotation);
     binder.install(mbinder);
@@ -233,8 +250,8 @@ public final class Multiscopes {
       InstancePrescoper instance = new InstancePrescoper() {
         @Override
         public <T> InstancePrescoper addInstanceObject(Key<T> key, PrescopeType type) {
-          Preconditions.checkNotNull(type, "type");
           Preconditions.checkNotNull(key, "key");
+          Preconditions.checkNotNull(type, "type");
           prescopeedKeys.addBinding().toInstance(new KeyWrapper(key, type));
           return this;
         }
@@ -371,80 +388,5 @@ public final class Multiscopes {
         return multiscope.toString() + "-NewInstanceProvider";
       }
     }
-  }
-
-
-  /**
-   * Binds the multiscope to the scope annotation, and binds {@link ScopeInstance} as prescoped in
-   * the scope as well. Creating new scope instances for this multiscope is bound to the
-   * newInstanceAnnotation, as well as the scope map provider. This call uses the default
-   * {@link DefaultScopeMapProvider}.
-   * 
-   * @param binder the binder to use
-   * @param multiscope the multiscope instance
-   * @param scopeAnnotation the scope annotation itself
-   * @param newScopeInstanceAnnotation the annotation for creating a new scope instance (and a new
-   *        scope map)
-   * 
-   */
-  @Deprecated
-  public static void bindMultiscope(final Binder binder, final Multiscope multiscope,
-      final Class<? extends Annotation> scopeAnnotation,
-      final Class<? extends Annotation> newScopeInstanceAnnotation) {
-    bindMultiscope(binder, multiscope, scopeAnnotation, newScopeInstanceAnnotation,
-        DefaultScopeMapProvider.class);
-  }
-
-  /**
-   * Binds the multiscope to the scope annotation, and binds {@link ScopeInstance} as prescoped in
-   * the scope as well. Creating new scope instances for this multiscope is bound to the
-   * newInstanceAnnotation, as well as the scopeMapProvider.
-   * 
-   * @param binder the binder to use
-   * @param multiscope the multiscope instance
-   * @param scopeAnnotation the scope annotation itself
-   * @param newInstanceAnnotation the annotation for creating a new scope instance (and a new scope
-   *        map)
-   * @param scopeMapProvider the provider for the scope map. If you're accessing your scoped
-   *        concurrently, this map should be threadsafe.
-   */
-  @Deprecated
-  public static void bindMultiscope(final Binder binder, final Multiscope multiscope,
-      final Class<? extends Annotation> scopeAnnotation,
-      final Class<? extends Annotation> newInstanceAnnotation,
-      final Class<? extends Provider<Map<Key<?>, Object>>> scopeMapProvider) {
-    Preconditions.checkNotNull(multiscope);
-    Preconditions.checkNotNull(scopeAnnotation);
-    Preconditions.checkNotNull(binder);
-    Preconditions.checkNotNull(scopeMapProvider);
-
-    binder.bindScope(scopeAnnotation, multiscope);
-    final TypeLiteral<Map<Key<?>, Object>> scopeMap = new TypeLiteral<Map<Key<?>, Object>>() {};
-    binder.bind(scopeMap).annotatedWith(newInstanceAnnotation).toProvider(scopeMapProvider);
-
-    final Provider<Map<Key<?>, Object>> mapProvider =
-        binder.<Map<Key<?>, Object>>getProvider(Key.get(scopeMap, newInstanceAnnotation));
-
-    binder
-        .bind(ScopeInstance.class)
-        .annotatedWith(multiscope.getBindingAnnotation())
-        .toProvider(
-            new PrescopedProvider<ScopeInstance>(
-                "ScopeInstance should have been bound internally.", scopeAnnotation.getSimpleName()
-                    + "-ScopeInstanceFakeProvider")).in(scopeAnnotation);
-
-    binder.bind(ScopeInstance.class).annotatedWith(newInstanceAnnotation)
-        .toProvider(new Provider<ScopeInstance>() {
-
-          @Override
-          public ScopeInstance get() {
-            return multiscope.createScopeInstance(mapProvider.get());
-          }
-
-          @Override
-          public String toString() {
-            return scopeAnnotation.getSimpleName() + "-NewScopeInstanceProvider";
-          }
-        });
   }
 }

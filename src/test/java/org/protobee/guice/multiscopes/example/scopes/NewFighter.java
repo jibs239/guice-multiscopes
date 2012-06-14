@@ -26,13 +26,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.protobee.guice.multicopes.ScopeInstance;
+import org.protobee.guice.multiscopes.ScopeInstance;
 
 import com.google.inject.BindingAnnotation;
 
 /**
- * Specifies a new {@link ScopeInstance} for the {@link BattlestarScope}. Also specifies a new scope
- * storage map for the {@link BattlestarScope}.
+ * Specifies a new {@link ScopeInstance} for the {@link FighterScope}. Also specifies a new scope
+ * storage map for the {@link FighterScope}.
  * 
  * @author Daniel Murphy (daniel@dmurph.com)
  */
@@ -40,4 +40,4 @@ import com.google.inject.BindingAnnotation;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
 @BindingAnnotation
-public @interface NewBattlestarScopeInstance {}
+public @interface NewFighter {}

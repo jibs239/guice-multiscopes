@@ -1,6 +1,6 @@
-package org.protobee.guice.multicopes;
+package org.protobee.guice.multiscopes;
 
-import org.protobee.guice.multicopes.BoundedMultiscopeBinder.PrescopeType;
+import org.protobee.guice.multiscopes.BoundedMultiscopeBinder.PrescopeType;
 
 import com.google.inject.Key;
 

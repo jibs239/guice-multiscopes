@@ -20,16 +20,16 @@
  ******************************************************************************/
 package org.protobee.guice.multiscopes.example;
 
-import org.protobee.guice.multicopes.ScopeInstance;
+import org.protobee.guice.multiscopes.ScopeInstance;
 import org.protobee.guice.multiscopes.example.scoped.BattlestarFighterRoster;
-import org.protobee.guice.multiscopes.example.scopes.NewFighterScopeInstance;
+import org.protobee.guice.multiscopes.example.scopes.NewFighter;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 /**
- * Creates a {@link Fighter} with it's corresponding scope, and adds it to the
+ * Creates a {@link FighterHolder} with it's corresponding scope, and adds it to the
  * {@link BattlestarFighterRoster}.
  * 
  * @author Daniel Murphy (daniel@dmurph.com)
@@ -38,29 +38,29 @@ import com.google.inject.Singleton;
 public class FighterFactory {
 
   private final Provider<ScopeInstance> scopeProvider;
-  private final Provider<Fighter> fighterProvider;
+  private final Provider<FighterHolder> fighterProvider;
   private final Provider<BattlestarFighterRoster> rosterProvider;
 
   @Inject
-  public FighterFactory(@NewFighterScopeInstance Provider<ScopeInstance> scopeProvider,
-      Provider<Fighter> fighterProvider, Provider<BattlestarFighterRoster> rosterProvider) {
+  public FighterFactory(@NewFighter Provider<ScopeInstance> scopeProvider,
+      Provider<FighterHolder> fighterProvider, Provider<BattlestarFighterRoster> rosterProvider) {
     this.scopeProvider = scopeProvider;
     this.fighterProvider = fighterProvider;
     this.rosterProvider = rosterProvider;
   }
 
   /**
-   * Creates a fighter scope in a {@link Fighter}, and adds the fighter to the
+   * Creates a fighter scope in a {@link FighterHolder}, and adds the fighter to the
    * {@link BattlestarFighterRoster} from the battlestar scope. If prescoped objects were needed for
    * the fighter scope, they would probably be arguments of this method and put into the scope
    * before the creation of the fighter. <br/>
    * Preconditions: not in a fighter scope, and we need to be in the parent battlestar scope.
    */
-  public Fighter create() {
+  public FighterHolder create() {
 //    Preconditions.checkState(ExampleScopes.BATTLESTAR.isInScope(), "Not in Battlestar scope");
 
     ScopeInstance fighterScope = scopeProvider.get();
-    Fighter fighter;
+    FighterHolder fighter;
     try {
       fighterScope.enterScope();
       fighter = fighterProvider.get();

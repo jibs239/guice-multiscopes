@@ -35,11 +35,11 @@ import java.util.Set;
 
 import org.junit.After;
 import org.junit.Test;
-import org.protobee.guice.multicopes.Multiscope;
-import org.protobee.guice.multicopes.MultiscopeBinder;
-import org.protobee.guice.multicopes.MultiscopeExitor;
-import org.protobee.guice.multicopes.PrescopedProvider;
-import org.protobee.guice.multicopes.ScopeInstance;
+import org.protobee.guice.multiscopes.Multiscope;
+import org.protobee.guice.multiscopes.Multiscopes;
+import org.protobee.guice.multiscopes.PrescopedProvider;
+import org.protobee.guice.multiscopes.ScopeInstance;
+import org.protobee.guice.multiscopes.util.MultiscopeExitor;
 
 import com.google.common.collect.Iterables;
 import com.google.inject.AbstractModule;
@@ -77,8 +77,7 @@ public class UnboundedTests {
   static class UnboundedModule extends AbstractModule {
     @Override
     protected void configure() {
-      MultiscopeBinder.newBinder(binder(), TableScope.class, Table.class,
-          NewTableInstance.class);
+      Multiscopes.newBinder(binder(), TableScope.class, Table.class, NewTableInstance.class);
     }
   }
 

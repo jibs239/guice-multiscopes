@@ -11,11 +11,11 @@ import java.lang.annotation.Target;
 
 import org.junit.After;
 import org.junit.Test;
-import org.protobee.guice.multicopes.Descoper;
-import org.protobee.guice.multicopes.MultiscopeBinder;
-import org.protobee.guice.multicopes.MultiscopeExitor;
-import org.protobee.guice.multicopes.ScopeInstance;
-import org.protobee.guice.multicopes.CompleteDescoper;
+import org.protobee.guice.multiscopes.Multiscopes;
+import org.protobee.guice.multiscopes.ScopeInstance;
+import org.protobee.guice.multiscopes.util.CompleteDescoper;
+import org.protobee.guice.multiscopes.util.Descoper;
+import org.protobee.guice.multiscopes.util.MultiscopeExitor;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
@@ -68,8 +68,8 @@ public class DescoperTests {
   static class UnboundedModule extends AbstractModule {
     @Override
     protected void configure() {
-      MultiscopeBinder.newBinder(binder(), TableScope.class, Table.class, NewTableInstance.class);
-      MultiscopeBinder.newBinder(binder(), ChairScope.class, Chair.class, NewChairInstance.class);
+      Multiscopes.newBinder(binder(), TableScope.class, Table.class, NewTableInstance.class);
+      Multiscopes.newBinder(binder(), ChairScope.class, Chair.class, NewChairInstance.class);
     }
   }
 

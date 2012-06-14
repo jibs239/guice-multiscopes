@@ -18,49 +18,25 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package org.protobee.guice.multiscopes.example;
+package org.protobee.guice.multiscopes.example.scopes;
 
-import org.protobee.guice.multicopes.ScopeInstance;
-import org.protobee.guice.multiscopes.example.scopes.NewBattlestarScopeInstance;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
+import org.protobee.guice.multiscopes.ScopeInstance;
+
+import com.google.inject.BindingAnnotation;
 
 /**
- * Creates a {@link battlestarModel} with it's corresponding scope.
+ * Specifies the fighter {@link ScopeInstance} in the {@link FighterScope}
  * 
  * @author Daniel Murphy (daniel@dmurph.com)
  */
-@Singleton
-public class BattlestarFactory {
-
-  private final Provider<ScopeInstance> scopeProvider;
-  private final Provider<Battlestar> battlestarProvider;
-
-  @Inject
-  public BattlestarFactory(@NewBattlestarScopeInstance Provider<ScopeInstance> scopeProvider,
-      Provider<Battlestar> battlestarProvider) {
-    this.scopeProvider = scopeProvider;
-    this.battlestarProvider = battlestarProvider;
-  }
-
-  /**
-   * Creates a {@link Battlestar}. If prescoped objects were needed for the battlestar scope, they
-   * would probably be arguments of this method and put into the scope before the creation of the
-   * model. <br/>
-   * Preconditions: not in a battlestar scope
-   */
-  public Battlestar create() {
-
-    ScopeInstance battlestarScope = scopeProvider.get();
-    Battlestar model;
-    try {
-      battlestarScope.enterScope();
-      model = battlestarProvider.get();
-    } finally {
-      battlestarScope.exitScope();
-    }
-    return model;
-  }
-}
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
+@BindingAnnotation
+public @interface Fighter {}

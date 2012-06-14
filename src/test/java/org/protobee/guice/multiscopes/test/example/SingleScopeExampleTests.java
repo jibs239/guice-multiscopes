@@ -27,27 +27,27 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.protobee.guice.multiscopes.example.Battlestar;
-import org.protobee.guice.multiscopes.example.BattlestarFactory;
+import org.protobee.guice.multiscopes.ScopeInstance;
 import org.protobee.guice.multiscopes.example.scoped.CommandDeck;
+import org.protobee.guice.multiscopes.example.scopes.Battlestar;
+import org.protobee.guice.multiscopes.example.scopes.NewBattlestar;
 import org.protobee.guice.multiscopes.test.AbstractMultiscopeTest;
 
+import com.google.inject.Key;
 import com.google.inject.ProvisionException;
 
 public class SingleScopeExampleTests extends AbstractMultiscopeTest {
 
   @Test
   public void testSingleScoping() {
-
-    BattlestarFactory factory = injector.getInstance(BattlestarFactory.class);
-    Battlestar battlestar = factory.create();
+    ScopeInstance battlestar = injector.getInstance(Key.get(ScopeInstance.class, NewBattlestar.class));
     assertFalse(battlestar.isInScope());
 
     CommandDeck deck;
     try {
       battlestar.enterScope();
       assertTrue(battlestar.isInScope());
-      assertSame(battlestar, injector.getInstance(Battlestar.class));
+      assertSame(battlestar, injector.getInstance(Key.get(ScopeInstance.class, Battlestar.class)));
       deck = injector.getInstance(CommandDeck.class);
       deck.setCapacity(1);
       deck.setName("small deck");
@@ -70,10 +70,8 @@ public class SingleScopeExampleTests extends AbstractMultiscopeTest {
 
   @Test
   public void testMultipleScopeInstances() {
-
-    BattlestarFactory factory = injector.getInstance(BattlestarFactory.class);
-    Battlestar battlestar1 = factory.create();
-    Battlestar battlestar2 = factory.create();
+    ScopeInstance battlestar1 = injector.getInstance(Key.get(ScopeInstance.class, NewBattlestar.class));
+    ScopeInstance battlestar2 = injector.getInstance(Key.get(ScopeInstance.class, NewBattlestar.class));
 
     CommandDeck deck1;
     try {

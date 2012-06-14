@@ -18,26 +18,56 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package org.protobee.guice.multiscopes.example.scopes;
+package org.protobee.guice.multiscopes;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javax.annotation.Nullable;
 
-import org.protobee.guice.multicopes.ScopeInstance;
-
-import com.google.inject.BindingAnnotation;
+import com.google.inject.Provider;
+import com.google.inject.ProvisionException;
 
 /**
- * Specifies a new {@link ScopeInstance} for the {@link FighterScope}. Also specifies a new scope
- * storage map for the {@link FighterScope}.
+ * A provider that always throws an exception when {@link #get()} is called. Meant to be used for
+ * prescoped bindings.
  * 
  * @author Daniel Murphy (daniel@dmurph.com)
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
-@BindingAnnotation
-public @interface NewFighterScopeInstance {}
+public class PrescopedProvider<T> implements Provider<T> {
+
+  private final String exceptionMessage;
+  private final String description;
+
+  public PrescopedProvider() {
+    this(null, null);
+  }
+
+  /**
+   * @param exceptionMessage the message for the exception when {@link #get()} is called
+   */
+  public PrescopedProvider(@Nullable String exceptionMessage) {
+    this(exceptionMessage, null);
+  }
+
+  /**
+   * @param exceptionMessage the message for the exception when {@link #get()} is called
+   * @param description what's returned when {@link #toString()} is called
+   */
+  public PrescopedProvider(@Nullable String exceptionMessage, @Nullable String description) {
+    this.description = description;
+    this.exceptionMessage = exceptionMessage;
+  }
+
+  @Override
+  public T get() {
+    throw new ProvisionException(exceptionMessage != null
+        ? exceptionMessage
+        : "Prescoped object, this provider should never be called.");
+  }
+
+  @Override
+  public String toString() {
+    if (description == null) {
+      return super.toString();
+    }
+    return description;
+  }
+}

@@ -1,6 +1,8 @@
-package org.protobee.guice.multicopes;
+package org.protobee.guice.multiscopes;
 
 import java.util.Set;
+
+import org.protobee.guice.multiscopes.util.Descoper;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;

@@ -18,67 +18,31 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package org.protobee.guice.multiscopes.example;
-
-import org.protobee.guice.multiscopes.example.scopes.ExampleScopes;
-
-import com.google.common.base.Preconditions;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
+package org.protobee.guice.multiscopes.util;
 
 /**
- * This is an example utility class for exiting any current {@link Battlestar} or {@link Fighter}
- * scopes, and then re-entering them after performing any logic that needed any current scopes to be
- * exited. Calls should always be surrounded by a try-finally clause, where {@link #rescope()} is in
- * the finally clause.
+ * Descoper for exiting and re-entering one or more multiscopes. If injected with the scope instance
+ * annotation of a class, this descoper applies to that multiscope. If injected with no binding
+ * annotation, this descoper applies to all multiscopes.
+ * <br/><br/>
+ * If you need to just exit all scopes, try the {@link MultiscopeExitor}.
  * 
  * @author Daniel Murphy (daniel@dmurph.com)
  */
-public class Descoper {
-
-  private final Provider<Battlestar> battlestarProvider;
-  private final Provider<Fighter> fighterProvider;
-
-  private Battlestar battlestar = null;
-  private Fighter fighter = null;
-
-  @Inject
-  public Descoper(Provider<Battlestar> battlestarProvider, Provider<Fighter> fighterProvider) {
-    this.battlestarProvider = battlestarProvider;
-    this.fighterProvider = fighterProvider;
-  }
+public interface Descoper {
 
   /**
-   * Exits any current {@link Battlestar} or {@link Fighter} scopes. Should be in a try-finally
-   * clause, with {@link #rescope()} in the finally clause.
+   * Exits any scope or scopes this descoper corresponds to
    * 
    * @throws IllegalStateException if {@link #descope()} was already called without a matching
    *         {@link #rescope()}
    */
-  public void descope() throws IllegalStateException {
-    Preconditions.checkState(battlestar == null && fighter == null, "Already descoped.");
-    if (ExampleScopes.BATTLESTAR.isInScope()) {
-      battlestar = battlestarProvider.get();
-      battlestar.exitScope();
-    }
-    if (ExampleScopes.FIGHTER.isInScope()) {
-      fighter = fighterProvider.get();
-      battlestar.exitScope();
-    }
-  }
+  void descope() throws IllegalStateException;
 
   /**
    * Re-enters scopes that were exited
+   * 
+   * @throws IllegalStateException if the corresponding scope or scopes are already entered
    */
-  public void rescope() {
-    if (fighter != null) {
-      fighter.enterScope();
-      fighter = null;
-    }
-
-    if (battlestar != null) {
-      battlestar.enterScope();
-      battlestar = null;
-    }
-  }
+  void rescope() throws IllegalStateException;
 }

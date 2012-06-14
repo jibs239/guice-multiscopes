@@ -1,6 +1,7 @@
-package org.protobee.guice.multicopes;
+package org.protobee.guice.multiscopes.util;
 
 import java.util.Set;
+
 
 import com.google.inject.Inject;
 
@@ -30,7 +31,7 @@ public class CompleteDescoper implements Descoper {
   }
 
   @Override
-  public void rescope() {
+  public void rescope() throws IllegalStateException {
     for (Descoper descoper : descopers) {
       descoper.rescope();
     }

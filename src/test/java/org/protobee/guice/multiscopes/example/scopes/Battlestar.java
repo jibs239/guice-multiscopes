@@ -18,53 +18,25 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package org.protobee.guice.multicopes;
+package org.protobee.guice.multiscopes.example.scopes;
 
-import javax.annotation.Nullable;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import com.google.inject.Key;
+import org.protobee.guice.multiscopes.ScopeInstance;
+
+import com.google.inject.BindingAnnotation;
 
 /**
- * An instance of a scope
+ * Specifies the battlestar {@link ScopeInstance} in the {@link BattlestarScope}
  * 
  * @author Daniel Murphy (daniel@dmurph.com)
  */
-public interface ScopeInstance {
-
-  /**
-   * Enters the scope of this object for the calling thread. All injections of objects that are
-   * under the scope this object describes will be held by this object.
-   * 
-   * A call to {@link #enterScope()} should always be in a try-finally block, where
-   * {@link #exitScope()} is called in the finally block.
-   * 
-   * @throws IllegalStateException if we are already in the scope described by this object
-   */
-  void enterScope() throws IllegalStateException;
-
-  /**
-   * @return if the calling thread is currently in this object's scope
-   */
-  boolean isInScope();
-
-  /**
-   * Exits the scope this object holds. Will not throw exceptions (safe for finally clauses)
-   */
-  void exitScope();
-
-  /**
-   * Puts the object in this scope. This should only be done when completely unavoidable, ie,
-   * working with other non-guice code.
-   * 
-   * @param key
-   * @param object
-   * @throws IllegalArgumentException if the key does not match the object
-   * @throws NullPointerException if the key is null
-   */
-  void putInScope(Key<?> key, @Nullable Object object) throws IllegalArgumentException;
-
-  /**
-   * @return the unique id of this instance in it's respective scope
-   */
-  int getInstanceId();
-}
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
+@BindingAnnotation
+public @interface Battlestar {}

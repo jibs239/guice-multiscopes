@@ -1,9 +1,9 @@
-package org.protobee.guice.multicopes.scopes;
+package org.protobee.guice.multiscopes.scopes;
 
 import java.lang.annotation.Annotation;
 import java.util.Map;
 
-import org.protobee.guice.multicopes.Multiscope;
+import org.protobee.guice.multiscopes.Multiscope;
 
 import com.google.inject.Key;
 import com.google.inject.OutOfScopeException;

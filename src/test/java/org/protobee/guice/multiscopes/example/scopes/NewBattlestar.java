@@ -18,23 +18,26 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package org.protobee.guice.multicopes;
+package org.protobee.guice.multiscopes.example.scopes;
 
-import java.util.Map;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import com.google.common.collect.MapMaker;
-import com.google.inject.Key;
-import com.google.inject.Provider;
+import org.protobee.guice.multiscopes.ScopeInstance;
+
+import com.google.inject.BindingAnnotation;
 
 /**
- * The default scope map provider, creates a concurrent map with concurrency of 8 and initial
- * capacity of 100
+ * Specifies a new {@link ScopeInstance} for the {@link BattlestarScope}. Also specifies a new scope
+ * storage map for the {@link BattlestarScope}.
  * 
  * @author Daniel Murphy (daniel@dmurph.com)
  */
-public class DefaultScopeMapProvider implements Provider<Map<Key<?>, Object>> {
-  @Override
-  public Map<Key<?>, Object> get() {
-    return new MapMaker().concurrencyLevel(8).initialCapacity(100).makeMap();
-  }
-}
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
+@BindingAnnotation
+public @interface NewBattlestar {}

@@ -1,4 +1,4 @@
-package org.protobee.guice.multicopes;
+package org.protobee.guice.multiscopes;
 
 import java.lang.annotation.Annotation;
 import java.util.Map;

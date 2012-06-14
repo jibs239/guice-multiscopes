@@ -20,16 +20,24 @@
  ******************************************************************************/
 package org.protobee.guice.multiscopes.example;
 
-import org.protobee.guice.multicopes.Multiscopes;
+import org.protobee.guice.multiscopes.BoundedMultiscopeBinder;
+import org.protobee.guice.multiscopes.Multiscopes;
 import org.protobee.guice.multiscopes.example.scoped.BattlestarFighterRoster;
 import org.protobee.guice.multiscopes.example.scoped.CommandDeck;
 import org.protobee.guice.multiscopes.example.scoped.FighterWeapons;
 import org.protobee.guice.multiscopes.example.scoped.Pilot;
+import org.protobee.guice.multiscopes.example.scopes.AndromedaGalaxy;
+import org.protobee.guice.multiscopes.example.scopes.Battlestar;
 import org.protobee.guice.multiscopes.example.scopes.BattlestarScope;
-import org.protobee.guice.multiscopes.example.scopes.ExampleScopes;
+import org.protobee.guice.multiscopes.example.scopes.Fighter;
 import org.protobee.guice.multiscopes.example.scopes.FighterScope;
-import org.protobee.guice.multiscopes.example.scopes.NewBattlestarScopeInstance;
-import org.protobee.guice.multiscopes.example.scopes.NewFighterScopeInstance;
+import org.protobee.guice.multiscopes.example.scopes.Galaxy;
+import org.protobee.guice.multiscopes.example.scopes.GalaxyScope;
+import org.protobee.guice.multiscopes.example.scopes.MilkyWayGalaxy;
+import org.protobee.guice.multiscopes.example.scopes.NewBattlestar;
+import org.protobee.guice.multiscopes.example.scopes.NewFighter;
+import org.protobee.guice.multiscopes.util.CompleteDescoper;
+import org.protobee.guice.multiscopes.util.MultiscopeExitor;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
@@ -38,21 +46,22 @@ public class ExamplesGuiceModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    Multiscopes.bindMultiscope(binder(), ExampleScopes.BATTLESTAR, BattlestarScope.class,
-        NewBattlestarScopeInstance.class);
-    Multiscopes.bindMultiscope(binder(), ExampleScopes.FIGHTER, FighterScope.class,
-        NewFighterScopeInstance.class);
+    Multiscopes.newBinder(binder(), BattlestarScope.class, Battlestar.class, NewBattlestar.class);
+    Multiscopes.newBinder(binder(), FighterScope.class, Fighter.class, NewFighter.class);
+
+    BoundedMultiscopeBinder galaxyScopes =
+        Multiscopes.newBoundedBinder(binder(), GalaxyScope.class, Galaxy.class);
+
+    galaxyScopes.addInstance(MilkyWayGalaxy.class).addInstance(AndromedaGalaxy.class);
 
     bind(BattlestarFighterRoster.class).in(BattlestarScope.class);
     bind(CommandDeck.class).in(BattlestarScope.class);
     bind(FighterWeapons.class).in(FighterScope.class);
     bind(Pilot.class).in(FighterScope.class);
+    bind(CompleteDescoper.class);
+    bind(MultiscopeExitor.class);
 
-    bind(Descoper.class);
-
-    bind(Battlestar.class).in(BattlestarScope.class);
-    bind(BattlestarFactory.class).in(Singleton.class);
-    bind(Fighter.class).in(FighterScope.class);
+    bind(FighterHolder.class).in(FighterScope.class);
     bind(FighterFactory.class).in(Singleton.class);
   }
 }

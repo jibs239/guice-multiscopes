@@ -18,17 +18,23 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package org.protobee.guice.multiscopes.example.scopes;
+package org.protobee.guice.multiscopes;
 
-import org.protobee.guice.multicopes.Multiscope;
-import org.protobee.guice.multicopes.scopes.SimpleMultiscope;
+import java.util.Map;
+
+import com.google.common.collect.MapMaker;
+import com.google.inject.Key;
+import com.google.inject.Provider;
 
 /**
- * The class that holds our example scope instances.
+ * The default scope map provider, creates a concurrent map with concurrency of 8 and initial
+ * capacity of 100
  * 
  * @author Daniel Murphy (daniel@dmurph.com)
  */
-public final class ExampleScopes {
-  public static final Multiscope BATTLESTAR = new SimpleMultiscope(BattlestarScopeInstance.class);
-  public static final Multiscope FIGHTER = new SimpleMultiscope(FighterScopeInstance.class);
+public class DefaultScopeMapProvider implements Provider<Map<Key<?>, Object>> {
+  @Override
+  public Map<Key<?>, Object> get() {
+    return new MapMaker().concurrencyLevel(8).initialCapacity(100).makeMap();
+  }
 }

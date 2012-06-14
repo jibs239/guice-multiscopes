@@ -16,12 +16,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.After;
 import org.junit.Test;
-import org.protobee.guice.multicopes.BoundedMultiscopeBinder;
-import org.protobee.guice.multicopes.BoundedMultiscopeBinder.PrescopeType;
-import org.protobee.guice.multicopes.Multiscope;
-import org.protobee.guice.multicopes.MultiscopeExitor;
-import org.protobee.guice.multicopes.PrescopedProvider;
-import org.protobee.guice.multicopes.ScopeInstance;
+import org.protobee.guice.multiscopes.BoundedMultiscopeBinder;
+import org.protobee.guice.multiscopes.Multiscope;
+import org.protobee.guice.multiscopes.Multiscopes;
+import org.protobee.guice.multiscopes.PrescopedProvider;
+import org.protobee.guice.multiscopes.ScopeInstance;
+import org.protobee.guice.multiscopes.BoundedMultiscopeBinder.PrescopeType;
+import org.protobee.guice.multiscopes.util.MultiscopeExitor;
 
 import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
@@ -68,7 +69,7 @@ public class BoundedTests {
     @Override
     protected void configure() {
       BoundedMultiscopeBinder binder =
-          BoundedMultiscopeBinder.newBoundedBinder(binder(), PlanetScope.class, Planet.class);
+          Multiscopes.newBoundedBinder(binder(), PlanetScope.class, Planet.class);
       binder.addInstance(Mercury.class).addInstance(Venus.class);
     }
   }
@@ -76,8 +77,8 @@ public class BoundedTests {
   static class EarthModule extends AbstractModule {
     @Override
     protected void configure() {
-      BoundedMultiscopeBinder.newBoundedBinder(binder(), PlanetScope.class, Planet.class)
-          .addInstance(Earth.class);
+      Multiscopes.newBoundedBinder(binder(), PlanetScope.class, Planet.class).addInstance(
+          Earth.class);
     }
   }
 
@@ -85,7 +86,7 @@ public class BoundedTests {
     @Override
     protected void configure() {
       BoundedMultiscopeBinder boundedScopes =
-          BoundedMultiscopeBinder.newBoundedBinder(binder(), PlanetScope.class, Planet.class);
+          Multiscopes.newBoundedBinder(binder(), PlanetScope.class, Planet.class);
 
       bindConstant().annotatedWith(Venus.class).to("Venus");
       bindConstant().annotatedWith(Mercury.class).to("Mercury");
@@ -171,7 +172,7 @@ public class BoundedTests {
       @Override
       protected void configure() {
         BoundedMultiscopeBinder boundedScopes =
-            BoundedMultiscopeBinder.newBoundedBinder(binder(), PlanetScope.class, Planet.class);
+            Multiscopes.newBoundedBinder(binder(), PlanetScope.class, Planet.class);
 
         bind(Object.class).toProvider(new Provider<Object>() {
           @Override
@@ -183,8 +184,8 @@ public class BoundedTests {
         boundedScopes.prescopeInstance(Mercury.class).addInstanceObject(Key.get(Object.class),
             PrescopeType.LAZY);
 
-        bind(Object.class).annotatedWith(Planet.class)
-            .toProvider(new PrescopedProvider<Object>()).in(PlanetScope.class);
+        bind(Object.class).annotatedWith(Planet.class).toProvider(new PrescopedProvider<Object>())
+            .in(PlanetScope.class);
       }
     });
 

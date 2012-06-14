@@ -23,7 +23,7 @@ package org.protobee.guice.multiscopes.test;
 import org.junit.After;
 import org.junit.Before;
 import org.protobee.guice.multiscopes.example.ExamplesGuiceModule;
-import org.protobee.guice.multiscopes.example.scopes.ExampleScopes;
+import org.protobee.guice.multiscopes.util.MultiscopeExitor;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -39,7 +39,6 @@ public class AbstractMultiscopeTest {
   
   @After
   public void clearScopes() {
-    ExampleScopes.BATTLESTAR.exitScope();
-    ExampleScopes.FIGHTER.exitScope();
+    injector.getInstance(MultiscopeExitor.class).exitAllScopes();
   }
 }

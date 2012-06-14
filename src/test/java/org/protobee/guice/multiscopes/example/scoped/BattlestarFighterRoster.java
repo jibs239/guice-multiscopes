@@ -22,7 +22,7 @@ package org.protobee.guice.multiscopes.example.scoped;
 
 import java.util.Set;
 
-import org.protobee.guice.multiscopes.example.Fighter;
+import org.protobee.guice.multiscopes.example.FighterHolder;
 import org.protobee.guice.multiscopes.example.scopes.BattlestarScope;
 
 import com.google.common.collect.ImmutableSet;
@@ -31,22 +31,22 @@ import com.google.inject.Inject;
 
 @BattlestarScope
 public class BattlestarFighterRoster {
-  public final Set<Fighter> fighters = Sets.newHashSet();
+  public final Set<FighterHolder> fighters = Sets.newHashSet();
   
   @Inject
   public BattlestarFighterRoster() {
     
   }
 
-  public void addFighter(Fighter fighter) {
+  public void addFighter(FighterHolder fighter) {
     fighters.add(fighter);
   }
 
-  public Set<Fighter> getFighters() {
-    return ImmutableSet.<Fighter>copyOf(fighters);
+  public Set<FighterHolder> getFighters() {
+    return ImmutableSet.<FighterHolder>copyOf(fighters);
   }
 
-  public void removeFighter(Fighter fighter) {
+  public void removeFighter(FighterHolder fighter) {
     fighters.remove(fighter);
   }
 }

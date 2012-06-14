@@ -20,25 +20,28 @@
  ******************************************************************************/
 package org.protobee.guice.multiscopes.test.example;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.protobee.guice.multiscopes.example.Battlestar;
-import org.protobee.guice.multiscopes.example.BattlestarFactory;
-import org.protobee.guice.multiscopes.example.Fighter;
+import org.protobee.guice.multiscopes.ScopeInstance;
 import org.protobee.guice.multiscopes.example.FighterFactory;
+import org.protobee.guice.multiscopes.example.FighterHolder;
+import org.protobee.guice.multiscopes.example.scopes.Battlestar;
+import org.protobee.guice.multiscopes.example.scopes.NewBattlestar;
 import org.protobee.guice.multiscopes.test.AbstractMultiscopeTest;
+
+import com.google.inject.Key;
 
 public class MultipleScopeExampleTests extends AbstractMultiscopeTest {
 
   @Test
   public void testFighterHasBattleship() {
-
-    BattlestarFactory battlestarFactory = injector.getInstance(BattlestarFactory.class);
     FighterFactory fighterFactory = injector.getInstance(FighterFactory.class);
-    Battlestar battlestar = battlestarFactory.create();
+    ScopeInstance battlestar =
+        injector.getInstance(Key.get(ScopeInstance.class, NewBattlestar.class));
 
-    Fighter fighter;
+    FighterHolder fighter;
     try {
       battlestar.enterScope();
 
@@ -50,7 +53,7 @@ public class MultipleScopeExampleTests extends AbstractMultiscopeTest {
 
     try {
       fighter.enterScope();
-      assertSame(fighter, injector.getInstance(Fighter.class));
+      assertSame(fighter, injector.getInstance(FighterHolder.class));
     } finally {
       fighter.exitScope();
     }
@@ -58,11 +61,11 @@ public class MultipleScopeExampleTests extends AbstractMultiscopeTest {
 
   @Test
   public void testEmbeddedScoping() {
-    BattlestarFactory battlestarFactory = injector.getInstance(BattlestarFactory.class);
     FighterFactory fighterFactory = injector.getInstance(FighterFactory.class);
-    Battlestar battlestar = battlestarFactory.create();
+    ScopeInstance battlestar =
+        injector.getInstance(Key.get(ScopeInstance.class, NewBattlestar.class));
 
-    Fighter fighter;
+    FighterHolder fighter;
     try {
       battlestar.enterScope();
       fighter = fighterFactory.create();
@@ -75,8 +78,8 @@ public class MultipleScopeExampleTests extends AbstractMultiscopeTest {
       fighter.enterScope();
       assertTrue(battlestar.isInScope());
       assertTrue(fighter.isInScope());
-      assertSame(battlestar, injector.getInstance(Battlestar.class));
-      assertSame(fighter, injector.getInstance(Fighter.class));
+      assertSame(battlestar, injector.getInstance(Key.get(ScopeInstance.class, Battlestar.class)));
+      assertSame(fighter, injector.getInstance(FighterHolder.class));
     } finally {
       fighter.exitScope();
       battlestar.exitScope();

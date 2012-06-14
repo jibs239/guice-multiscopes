@@ -18,56 +18,63 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package org.protobee.guice.multicopes;
+package org.protobee.guice.multiscopes.example;
 
-import javax.annotation.Nullable;
+import org.protobee.guice.multiscopes.ScopeInstance;
+import org.protobee.guice.multiscopes.example.scopes.Battlestar;
+import org.protobee.guice.multiscopes.example.scopes.FighterScope;
+import org.protobee.guice.multiscopes.example.scopes.Fighter;
 
-import com.google.inject.Provider;
-import com.google.inject.ProvisionException;
+import com.google.inject.Inject;
 
 /**
- * A provider that always throws an exception when {@link #get()} is called. Meant to be used for
- * prescoped bindings.
+ * Represents a Fighter and hold it's scope. We use this holder to facilitate a hierarchy, where we
+ * have a parent {@link Battlestar}. This hierarchical scoping is only facilitated through the
+ * {@link FighterFactory} and our injected {@link Battlestar} {@link ScopeInstance}.
  * 
  * @author Daniel Murphy (daniel@dmurph.com)
  */
-public class PrescopedProvider<T> implements Provider<T> {
+@FighterScope
+public class FighterHolder {
 
-  private final String exceptionMessage;
-  private final String description;
+  private final ScopeInstance scope;
+  private final ScopeInstance battlestar;
 
-  public PrescopedProvider() {
-    this(null, null);
+  @Inject
+  public FighterHolder(@Fighter ScopeInstance scope, @Battlestar ScopeInstance battlestar) {
+    this.scope = scope;
+    this.battlestar = battlestar;
+  }
+
+  public ScopeInstance getBattlestar() {
+    return battlestar;
+  }
+
+  public ScopeInstance getScope() {
+    return scope;
   }
 
   /**
-   * @param exceptionMessage the message for the exception when {@link #get()} is called
+   * Enters the fighter scope. Calls should be in a try-finally statement, with {@link #exitScope()}
+   * in the finally clause
+   * 
+   * @throws IllegalStateException if we're already in a figher scope
+   * @see ScopeInstance#enterScope()
    */
-  public PrescopedProvider(@Nullable String exceptionMessage) {
-    this(exceptionMessage, null);
+  public void enterScope() throws IllegalStateException {
+    scope.enterScope();
+  }
+
+  public boolean isInScope() {
+    return scope.isInScope();
   }
 
   /**
-   * @param exceptionMessage the message for the exception when {@link #get()} is called
-   * @param description what's returned when {@link #toString()} is called
+   * Exits the fighter scope.
+   * 
+   * @see ScopeInstance#exitScope()
    */
-  public PrescopedProvider(@Nullable String exceptionMessage, @Nullable String description) {
-    this.description = description;
-    this.exceptionMessage = exceptionMessage;
-  }
-
-  @Override
-  public T get() {
-    throw new ProvisionException(exceptionMessage != null
-        ? exceptionMessage
-        : "Prescoped object, this provider should never be called.");
-  }
-
-  @Override
-  public String toString() {
-    if (description == null) {
-      return super.toString();
-    }
-    return description;
+  public void exitScope() {
+    scope.exitScope();
   }
 }

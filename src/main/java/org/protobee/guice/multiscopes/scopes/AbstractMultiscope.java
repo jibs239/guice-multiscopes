@@ -1,11 +1,11 @@
-package org.protobee.guice.multicopes.scopes;
+package org.protobee.guice.multiscopes.scopes;
 
 import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.protobee.guice.multicopes.Multiscope;
-import org.protobee.guice.multicopes.ScopeInstance;
+import org.protobee.guice.multiscopes.Multiscope;
+import org.protobee.guice.multiscopes.ScopeInstance;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Key;

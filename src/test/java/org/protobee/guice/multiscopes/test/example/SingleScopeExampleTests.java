@@ -32,6 +32,8 @@ import org.protobee.guice.multiscopes.example.scoped.CommandDeck;
 import org.protobee.guice.multiscopes.example.scopes.Battlestar;
 import org.protobee.guice.multiscopes.example.scopes.NewBattlestar;
 import org.protobee.guice.multiscopes.test.AbstractMultiscopeTest;
+import org.protobee.guice.multiscopes.util.Descoper;
+import org.protobee.guice.multiscopes.util.MultiscopeExitor;
 
 import com.google.inject.Key;
 import com.google.inject.ProvisionException;
@@ -40,7 +42,8 @@ public class SingleScopeExampleTests extends AbstractMultiscopeTest {
 
   @Test
   public void testSingleScoping() {
-    ScopeInstance battlestar = injector.getInstance(Key.get(ScopeInstance.class, NewBattlestar.class));
+    ScopeInstance battlestar =
+        injector.getInstance(Key.get(ScopeInstance.class, NewBattlestar.class));
     assertFalse(battlestar.isInScope());
 
     CommandDeck deck;
@@ -70,8 +73,10 @@ public class SingleScopeExampleTests extends AbstractMultiscopeTest {
 
   @Test
   public void testMultipleScopeInstances() {
-    ScopeInstance battlestar1 = injector.getInstance(Key.get(ScopeInstance.class, NewBattlestar.class));
-    ScopeInstance battlestar2 = injector.getInstance(Key.get(ScopeInstance.class, NewBattlestar.class));
+    ScopeInstance battlestar1 =
+        injector.getInstance(Key.get(ScopeInstance.class, NewBattlestar.class));
+    ScopeInstance battlestar2 =
+        injector.getInstance(Key.get(ScopeInstance.class, NewBattlestar.class));
 
     CommandDeck deck1;
     try {
@@ -79,7 +84,7 @@ public class SingleScopeExampleTests extends AbstractMultiscopeTest {
       deck1 = injector.getInstance(CommandDeck.class);
       deck1.setCapacity(10);
       deck1.setName("Deck1");
-      
+
     } finally {
       battlestar1.exitScope();
     }
@@ -111,6 +116,53 @@ public class SingleScopeExampleTests extends AbstractMultiscopeTest {
       assertEquals("Deck2", deck.getName());
     } finally {
       battlestar2.exitScope();
+    }
+  }
+
+  @Test
+  public void testDescopers() {
+    ScopeInstance battlestar =
+        injector.getInstance(Key.get(ScopeInstance.class, NewBattlestar.class));
+    Descoper descoper = injector.getInstance(Key.get(Descoper.class, Battlestar.class));
+    MultiscopeExitor exitor = injector.getInstance(MultiscopeExitor.class);
+    
+    try {
+      battlestar.enterScope();
+      descoper.descope();
+      assertFalse(battlestar.isInScope());
+      descoper.rescope();
+      assertTrue(battlestar.isInScope());
+    } finally {
+      exitor.exitAllScopes();
+      assertFalse(battlestar.isInScope());
+    }
+    
+    boolean caught = false;
+    try {
+      battlestar.enterScope();
+      descoper.rescope();
+    } catch (IllegalStateException e) {
+      caught = true;
+    } finally {
+      battlestar.exitScope();
+    }
+    assertTrue(caught);
+    
+    caught = false;
+    try {
+      battlestar.enterScope();
+      descoper.descope();
+      descoper.descope();
+    } catch (IllegalStateException e) {
+      caught = true;
+    }
+    assertTrue(caught);
+    
+    try {
+      descoper.rescope();
+      assertTrue(battlestar.isInScope());
+    } finally {
+      battlestar.exitScope();
     }
   }
 }

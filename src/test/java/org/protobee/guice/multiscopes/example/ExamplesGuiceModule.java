@@ -21,12 +21,15 @@
 package org.protobee.guice.multiscopes.example;
 
 import org.protobee.guice.multiscopes.BoundedMultiscopeBinder;
+import org.protobee.guice.multiscopes.BoundedMultiscopeBinder.PrescopeType;
 import org.protobee.guice.multiscopes.Multiscopes;
 import org.protobee.guice.multiscopes.example.scoped.BattlestarFighterRoster;
 import org.protobee.guice.multiscopes.example.scoped.CommandDeck;
 import org.protobee.guice.multiscopes.example.scoped.FighterWeapons;
+import org.protobee.guice.multiscopes.example.scoped.GalaxyCenter;
+import org.protobee.guice.multiscopes.example.scoped.GalaxyProperties;
 import org.protobee.guice.multiscopes.example.scoped.Pilot;
-import org.protobee.guice.multiscopes.example.scopes.AndromedaGalaxy;
+import org.protobee.guice.multiscopes.example.scoped.Star;
 import org.protobee.guice.multiscopes.example.scopes.Battlestar;
 import org.protobee.guice.multiscopes.example.scopes.BattlestarScope;
 import org.protobee.guice.multiscopes.example.scopes.Fighter;
@@ -40,7 +43,10 @@ import org.protobee.guice.multiscopes.util.CompleteDescoper;
 import org.protobee.guice.multiscopes.util.MultiscopeExitor;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Key;
+import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
 
 public class ExamplesGuiceModule extends AbstractModule {
 
@@ -49,11 +55,7 @@ public class ExamplesGuiceModule extends AbstractModule {
     Multiscopes.newBinder(binder(), BattlestarScope.class, Battlestar.class, NewBattlestar.class);
     Multiscopes.newBinder(binder(), FighterScope.class, Fighter.class, NewFighter.class);
 
-    BoundedMultiscopeBinder galaxyScopes =
-        Multiscopes.newBoundedBinder(binder(), GalaxyScope.class, Galaxy.class);
-
-    galaxyScopes.addInstance(MilkyWayGalaxy.class).addInstance(AndromedaGalaxy.class);
-
+    // bind our scoped objects
     bind(BattlestarFighterRoster.class).in(BattlestarScope.class);
     bind(CommandDeck.class).in(BattlestarScope.class);
     bind(FighterWeapons.class).in(FighterScope.class);
@@ -61,7 +63,52 @@ public class ExamplesGuiceModule extends AbstractModule {
     bind(CompleteDescoper.class);
     bind(MultiscopeExitor.class);
 
+    // bind our custom holder and factory
     bind(FighterHolder.class).in(FighterScope.class);
     bind(FighterFactory.class).in(Singleton.class);
+
+
+    // bind our bounded multiscope
+    Multiscopes.newBoundedBinder(binder(), GalaxyScope.class, Galaxy.class);
+
+    // bind required prescoped items
+    Multiscopes.bindAsPrescoped(binder(), GalaxyScope.class, Galaxy.class, GalaxyProperties.class);
+    TypeLiteral<Star[]> starArrayType = new TypeLiteral<Star[]>() {};
+    Multiscopes.bindAsPrescoped(binder(), GalaxyScope.class, Galaxy.class, starArrayType);
+    bind(GalaxyCenter.class).in(GalaxyScope.class);
+
+    // install our milkly way module to define the milky way galaxy scope
+    install(new MilklyWayModule());
+  }
+
+  // separated into separate module as an example, would usually be in a separate file
+  public class MilklyWayModule extends AbstractModule {
+    @Override
+    protected void configure() {
+      BoundedMultiscopeBinder galaxyScopes =
+          Multiscopes.newBoundedBinder(binder(), GalaxyScope.class, Galaxy.class);
+      galaxyScopes.addInstance(MilkyWayGalaxy.class);
+
+      TypeLiteral<Star[]> starArrayType = new TypeLiteral<Star[]>() {};
+
+      galaxyScopes
+          .prescopeInstance(MilkyWayGalaxy.class)
+          .addInstanceObject(Key.get(starArrayType, MilkyWayGalaxy.class))
+          .addInstanceObject(Key.get(GalaxyProperties.class, MilkyWayGalaxy.class),
+              PrescopeType.EAGER);
+    }
+
+    @Provides
+    @MilkyWayGalaxy
+    public GalaxyProperties getProperties() {
+      return new GalaxyProperties(200000000000l, 40000l);
+    }
+
+    @Provides
+    @MilkyWayGalaxy
+    public Star[] getStars() {
+      // just a couple blank ones for example
+      return new Star[] {new Star() {}, new Star() {}};
+    }
   }
 }

@@ -38,7 +38,7 @@ public class AssistedMultiscope extends AbstractMultiscope {
         Map<Key<?>, Object> scopeMap = scopeContext.get();
 
         if (scopeMap == null) {
-          throw new OutOfScopeException("Cannot access session scoped object '" + key
+          throw new OutOfScopeException("Cannot access scoped object '" + key
               + "'. This means we are not inside of a " + getName() + " scoped call.");
         }
         Object preT = scopeMap.get(key);

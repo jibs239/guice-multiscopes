@@ -61,7 +61,7 @@ import com.google.inject.spi.Toolable;
  * {@link Multiscope} (also to specify a new scope storage map internally)
  * <li>Optionally, after creation you can specify a provider for the scope storage map. This is
  * specified from the {@link MultiscopeBinder} after you create it. This defaults to
- * {@link DefaultScopeMapProvider}.
+ * {@link MultiscopeUtils#createDefaultScopeMap()}.
  * </ul>
  * <br/>
  * A bounded multiscope binder from {@link #newBoundedBinder(Binder, Class, Class)} needs
@@ -71,7 +71,8 @@ import com.google.inject.spi.Toolable;
  * <li>At least one scope instance, specified from the {@link BoundedMultiscopeBinder} (scopes can
  * be added on various modules, this is similar to the multiset).
  * <li>Optionally, you can specify a provider for the scope storage map. This is performed on the
- * {@link MultiscopeBinder} after you create it. This defaults to {@link DefaultScopeMapProvider}.
+ * {@link MultiscopeBinder} after you create it. This defaults to
+ * {@link MultiscopeUtils#createDefaultScopeMap()}.
  * <li>Optionally, you can prescope keys in bounded scope instances using
  * {@link BoundedMultiscopeBinder#prescopeInstance(Class)}. This makes the prescoped objects show up
  * when using the scope binding annotation with the key from the prescoped object. This is used in
@@ -114,8 +115,8 @@ public final class Multiscopes {
     Preconditions.checkNotNull(binder, "binder");
     Preconditions.checkNotNull(scopeAnnotation, "scopeAnnotation");
     Preconditions.checkNotNull(scopeBindingAnnotation, "scopeBindingAnnotation");
-    RealBoundedMultiscopeBinder mbinder =
-        new RealBoundedMultiscopeBinder(binder, scopeAnnotation, scopeBindingAnnotation);
+    RealBoundedMultiscopeModule mbinder =
+        new RealBoundedMultiscopeModule(binder, scopeAnnotation, scopeBindingAnnotation);
     binder.install(mbinder);
     return mbinder;
   }
@@ -151,28 +152,25 @@ public final class Multiscopes {
     protected final Class<? extends Annotation> scopeAnnotation;
     protected final Class<? extends Annotation> scopeBindingAnnotation;
     protected final Class<? extends Annotation> newScopeBindingAnnotation;
-    protected final Multiscope multiscope;
+    protected Multiscope multiscope;
     protected Binder binder;
 
     RealMultiscopeModule(Binder binder, Class<? extends Annotation> scopeAnnotation,
         Class<? extends Annotation> scopeBindingAnnotation,
-        Class<? extends Annotation> newScopeBindingAnnotation) {
-      this(binder, scopeAnnotation, scopeBindingAnnotation, newScopeBindingAnnotation,
-          new SimpleMultiscope(scopeBindingAnnotation));
-    }
-
-    RealMultiscopeModule(Binder binder, Class<? extends Annotation> scopeAnnotation,
-        Class<? extends Annotation> scopeBindingAnnotation,
-        @Nullable Class<? extends Annotation> newScopeBindingAnnotation, Multiscope multiscope) {
+        @Nullable Class<? extends Annotation> newScopeBindingAnnotation) {
       this.binder = binder;
       this.scopeAnnotation = scopeAnnotation;
       this.scopeBindingAnnotation = scopeBindingAnnotation;
       this.newScopeBindingAnnotation = newScopeBindingAnnotation;
-      this.multiscope = multiscope;
+    }
+
+    protected Multiscope createMultiscope() {
+      return new SimpleMultiscope(scopeBindingAnnotation);
     }
 
     @Override
     public void configure(Binder binder) {
+      this.multiscope = createMultiscope();
       binder.bindScope(scopeAnnotation, multiscope);
       if (newScopeBindingAnnotation != null) {
         binder.bind(ScopeInstance.class).annotatedWith(newScopeBindingAnnotation)
@@ -201,6 +199,12 @@ public final class Multiscopes {
     public LinkedBindingBuilder<Map<Key<?>, Object>> bindScopeStorageMap() {
       return binder
           .bind(Key.get(new TypeLiteral<Map<Key<?>, Object>>() {}, scopeBindingAnnotation));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      return o instanceof RealMultiscopeModule
+          && ((RealMultiscopeModule) o).scopeAnnotation.equals(scopeAnnotation);
     }
 
     static class NewInstanceProvider implements Provider<ScopeInstance>, HasDependencies {
@@ -252,15 +256,19 @@ public final class Multiscopes {
     }
   }
 
-  static class RealBoundedMultiscopeBinder extends RealMultiscopeModule
+  static class RealBoundedMultiscopeModule extends RealMultiscopeModule
       implements
         Module,
         BoundedMultiscopeBinder {
 
-    RealBoundedMultiscopeBinder(Binder binder, Class<? extends Annotation> scopeAnnotation,
+    RealBoundedMultiscopeModule(Binder binder, Class<? extends Annotation> scopeAnnotation,
         Class<? extends Annotation> scopeBindingAnnotation) {
-      super(binder, scopeAnnotation, scopeBindingAnnotation, null, new AssistedMultiscope(
-          scopeBindingAnnotation));
+      super(binder, scopeAnnotation, scopeBindingAnnotation, null);
+    }
+
+    @Override
+    protected Multiscope createMultiscope() {
+      return new AssistedMultiscope(scopeBindingAnnotation);
     }
 
     @Override
@@ -269,8 +277,7 @@ public final class Multiscopes {
           .bind(ScopeInstance.class)
           .annotatedWith(instanceAnnotation)
           .toProvider(
-              new PrescopingSingletonInstanceProvider(scopeBindingAnnotation, multiscope,
-                  instanceAnnotation));
+              new PrescopingSingletonInstanceProvider(scopeBindingAnnotation, instanceAnnotation));
 
       Multibinder<ScopeInstance> instances =
           Multibinder.newSetBinder(binder, ScopeInstance.class, scopeBindingAnnotation);
@@ -306,8 +313,8 @@ public final class Multiscopes {
 
     @Override
     public boolean equals(Object o) {
-      return o instanceof RealBoundedMultiscopeBinder
-          && ((RealBoundedMultiscopeBinder) o).scopeAnnotation.equals(scopeAnnotation);
+      return o instanceof RealBoundedMultiscopeModule
+          && ((RealBoundedMultiscopeModule) o).scopeAnnotation.equals(scopeAnnotation);
     }
 
     @Override
@@ -332,20 +339,19 @@ public final class Multiscopes {
 
       final Class<? extends Annotation> scopeInstanceAnnotation;
       final Class<? extends Annotation> scopeBindingAnnotation;
-      final Multiscope multiscope;
 
       volatile ScopeInstance instance = null;
       final Object instanceLock = new Object();
 
+      Multiscope multiscope;
       Binding<Map<Key<?>, Object>> scopeMapBuilder = null;
       ImmutableSet<BindingAndType> bindings;
       ImmutableSet<Dependency<?>> dependencies;
       boolean initialized = false;
 
       PrescopingSingletonInstanceProvider(Class<? extends Annotation> scopeBindingAnnotation,
-          Multiscope multiscope, Class<? extends Annotation> scopeInstanceAnnotation) {
+          Class<? extends Annotation> scopeInstanceAnnotation) {
         this.scopeBindingAnnotation = scopeBindingAnnotation;
-        this.multiscope = multiscope;
         this.scopeInstanceAnnotation = scopeInstanceAnnotation;
       }
 
@@ -354,6 +360,7 @@ public final class Multiscopes {
       void initialize(Injector injector) {
         initialized = true;
 
+        multiscope = injector.getInstance(Key.get(Multiscope.class, scopeBindingAnnotation));
         TypeLiteral<Set<KeyWrapper>> keyType = new TypeLiteral<Set<KeyWrapper>>() {};
         Set<BindingAndType> bindings = Sets.newHashSet();
 
@@ -376,7 +383,8 @@ public final class Multiscopes {
         if (!initialized) {
           TypeLiteral<Set<KeyWrapper>> keyType = new TypeLiteral<Set<KeyWrapper>>() {};
           return ImmutableSet.<Dependency<?>>of(Dependency.get(Key.get(Injector.class)),
-              Dependency.get(Key.get(keyType, scopeInstanceAnnotation)));
+              Dependency.get(Key.get(keyType, scopeInstanceAnnotation)),
+              Dependency.get(Key.get(Multiscope.class, scopeBindingAnnotation)));
         }
         ImmutableSet.Builder<Dependency<?>> deps = ImmutableSet.builder();
         deps.addAll(dependencies);

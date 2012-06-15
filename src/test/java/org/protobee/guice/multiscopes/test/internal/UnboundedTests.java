@@ -134,6 +134,31 @@ public class UnboundedTests {
 
     assertNotSame(table, instance2);
   }
+  
+  @Test
+  public void testMultiscope() {
+    inj = Guice.createInjector(new UnboundedModule());
+
+    ScopeInstance table = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
+    Multiscope scope = inj.getInstance(Key.get(Multiscope.class, Table.class));
+    assertFalse(scope.isInScope());
+    assertEquals(Table.class, scope.getBindingAnnotation());
+
+    try {
+      table.enterScope();
+      assertTrue(scope.isInScope());
+    } finally {
+      scope.exitScope();
+      assertFalse(scope.isInScope());
+      assertFalse(table.isInScope());
+    }
+
+    assertFalse(table.isInScope());
+
+    ScopeInstance instance2 = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
+
+    assertNotSame(table, instance2);
+  }
 
   @Test
   public void testBasicScoping() {
@@ -164,6 +189,7 @@ public class UnboundedTests {
     Legs deck;
     try {
       table1.enterScope();
+      assertFalse(table2.isInScope());
       deck = inj.getInstance(Legs.class);
       assertNotNull(deck);
     } finally {
@@ -172,6 +198,7 @@ public class UnboundedTests {
 
     try {
       table2.enterScope();
+      assertFalse(table1.isInScope());
       assertNotSame(deck, inj.getInstance(Legs.class));
     } finally {
       table2.exitScope();

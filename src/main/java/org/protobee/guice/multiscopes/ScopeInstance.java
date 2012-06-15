@@ -43,7 +43,8 @@ public interface ScopeInstance {
   void enterScope() throws IllegalStateException;
 
   /**
-   * @return if the calling thread is currently in this object's scope
+   * true if the calling thread is currently in this object's scope instance (if we're in the same
+   * scope but in a different scope instance and this will be false)
    */
   boolean isInScope();
 

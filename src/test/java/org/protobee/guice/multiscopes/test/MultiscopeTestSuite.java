@@ -23,10 +23,12 @@ package org.protobee.guice.multiscopes.test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import org.protobee.guice.multiscopes.test.example.BoundedScopeExampleTests;
 import org.protobee.guice.multiscopes.test.example.MultipleScopeExampleTests;
 import org.protobee.guice.multiscopes.test.example.SingleScopeExampleTests;
 import org.protobee.guice.multiscopes.test.internal.InternalTestSuite;
 
 @RunWith(Suite.class)
-@SuiteClasses({InternalTestSuite.class, MultipleScopeExampleTests.class, SingleScopeExampleTests.class})
+@SuiteClasses({InternalTestSuite.class, MultipleScopeExampleTests.class,
+    SingleScopeExampleTests.class, BoundedScopeExampleTests.class})
 public class MultiscopeTestSuite {}

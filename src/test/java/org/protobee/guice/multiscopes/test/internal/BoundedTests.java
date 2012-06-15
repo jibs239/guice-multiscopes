@@ -145,6 +145,25 @@ public class BoundedTests {
     assertEquals(2, multiscopes.size());
     assertEquals(Sets.newHashSet(mercury, venus), multiscopes);
   }
+  
+  @Test
+  public void testMultiscopeInstance() {
+    inj = Guice.createInjector(new PlanetsModule());
+    
+    ScopeInstance mercury = inj.getInstance(Key.get(ScopeInstance.class, Mercury.class));
+    Multiscope planetScope = inj.getInstance(Key.get(Multiscope.class, Planet.class));
+    assertFalse(planetScope.isInScope());
+    assertEquals(Planet.class, planetScope.getBindingAnnotation());
+    
+    try {
+      mercury.enterScope();
+      assertTrue(planetScope.isInScope());
+    } finally {
+      planetScope.exitScope();
+      assertFalse(planetScope.isInScope());
+      assertFalse(mercury.isInScope());
+    }
+  }
 
   @Test
   public void testPrescoped() {

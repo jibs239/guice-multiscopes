@@ -20,6 +20,7 @@
  ******************************************************************************/
 package org.protobee.guice.multiscopes.test.example;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -30,6 +31,8 @@ import org.protobee.guice.multiscopes.example.FighterHolder;
 import org.protobee.guice.multiscopes.example.scopes.Battlestar;
 import org.protobee.guice.multiscopes.example.scopes.NewBattlestar;
 import org.protobee.guice.multiscopes.test.AbstractMultiscopeTest;
+import org.protobee.guice.multiscopes.util.CompleteDescoper;
+import org.protobee.guice.multiscopes.util.MultiscopeExitor;
 
 import com.google.inject.Key;
 
@@ -81,6 +84,45 @@ public class MultipleScopeExampleTests extends AbstractMultiscopeTest {
       assertSame(battlestar, injector.getInstance(Key.get(ScopeInstance.class, Battlestar.class)));
       assertSame(fighter, injector.getInstance(FighterHolder.class));
     } finally {
+      fighter.exitScope();
+      battlestar.exitScope();
+    }
+  }
+
+  @Test
+  public void testCompleteDescoperAndExitor() {
+    FighterFactory fighterFactory = injector.getInstance(FighterFactory.class);
+    ScopeInstance battlestar =
+        injector.getInstance(Key.get(ScopeInstance.class, NewBattlestar.class));
+    CompleteDescoper descoper = injector.getInstance(CompleteDescoper.class);
+    MultiscopeExitor exitor = injector.getInstance(MultiscopeExitor.class);
+
+    FighterHolder fighter;
+    try {
+      battlestar.enterScope();
+      fighter = fighterFactory.create();
+    } finally {
+      battlestar.exitScope();
+    }
+
+    try {
+      battlestar.enterScope();
+      fighter.enterScope();
+      assertTrue(battlestar.isInScope());
+      assertTrue(fighter.isInScope());
+      descoper.descope();
+      assertFalse(battlestar.isInScope());
+      assertFalse(fighter.isInScope());
+      descoper.rescope();
+      assertTrue(battlestar.isInScope());
+      assertTrue(fighter.isInScope());
+
+      exitor.exitAllScopes();
+      assertFalse(battlestar.isInScope());
+      assertFalse(fighter.isInScope());
+
+    } finally {
+      // just in case there was an exception
       fighter.exitScope();
       battlestar.exitScope();
     }

@@ -52,9 +52,9 @@ class DescoperProvider implements Provider<Descoper>, HasDependencies {
 
       @Override
       public void rescope() throws IllegalStateException {
+        Preconditions.checkState(!scope.isInScope(), "Cannot rescope when we're already in "
+            + scope);
         if (instance != null) {
-          Preconditions.checkState(!scope.isInScope(), "Cannot rescope when we're already in "
-              + scope);
           instance.enterScope();
           instance = null;
         }

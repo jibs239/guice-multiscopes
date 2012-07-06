@@ -102,6 +102,9 @@ public class SingleScopeExampleTests extends AbstractMultiscopeTest {
 
     try {
       battlestar1.enterScope();
+      assertTrue(battlestar1.isInScope());
+      assertFalse(battlestar2.isInScope());
+
       CommandDeck deck = injector.getInstance(CommandDeck.class);
       assertSame(deck1, deck);
       assertEquals("Deck1", deck.getName());
@@ -111,6 +114,9 @@ public class SingleScopeExampleTests extends AbstractMultiscopeTest {
 
     try {
       battlestar2.enterScope();
+      assertTrue(battlestar2.isInScope());
+      assertFalse(battlestar1.isInScope());
+
       CommandDeck deck = injector.getInstance(CommandDeck.class);
       assertSame(deck2, deck);
       assertEquals("Deck2", deck.getName());
@@ -125,7 +131,7 @@ public class SingleScopeExampleTests extends AbstractMultiscopeTest {
         injector.getInstance(Key.get(ScopeInstance.class, NewBattlestar.class));
     Descoper descoper = injector.getInstance(Key.get(Descoper.class, Battlestar.class));
     MultiscopeExitor exitor = injector.getInstance(MultiscopeExitor.class);
-    
+
     try {
       battlestar.enterScope();
       descoper.descope();
@@ -136,7 +142,7 @@ public class SingleScopeExampleTests extends AbstractMultiscopeTest {
       exitor.exitAllScopes();
       assertFalse(battlestar.isInScope());
     }
-    
+
     boolean caught = false;
     try {
       battlestar.enterScope();
@@ -147,7 +153,7 @@ public class SingleScopeExampleTests extends AbstractMultiscopeTest {
       battlestar.exitScope();
     }
     assertTrue(caught);
-    
+
     caught = false;
     try {
       battlestar.enterScope();
@@ -157,7 +163,7 @@ public class SingleScopeExampleTests extends AbstractMultiscopeTest {
       caught = true;
     }
     assertTrue(caught);
-    
+
     try {
       descoper.rescope();
       assertTrue(battlestar.isInScope());

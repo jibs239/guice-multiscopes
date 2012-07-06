@@ -20,10 +20,13 @@
  ******************************************************************************/
 package org.protobee.guice.multiscopes.example;
 
+import org.protobee.guice.multiscopes.Multiscope;
 import org.protobee.guice.multiscopes.ScopeInstance;
 import org.protobee.guice.multiscopes.example.scoped.BattlestarFighterRoster;
+import org.protobee.guice.multiscopes.example.scopes.Battlestar;
 import org.protobee.guice.multiscopes.example.scopes.NewFighter;
 
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -40,13 +43,16 @@ public class FighterFactory {
   private final Provider<ScopeInstance> scopeProvider;
   private final Provider<FighterHolder> fighterProvider;
   private final Provider<BattlestarFighterRoster> rosterProvider;
+  private final Multiscope battlestarScope;
 
   @Inject
   public FighterFactory(@NewFighter Provider<ScopeInstance> scopeProvider,
-      Provider<FighterHolder> fighterProvider, Provider<BattlestarFighterRoster> rosterProvider) {
+      Provider<FighterHolder> fighterProvider, Provider<BattlestarFighterRoster> rosterProvider,
+      @Battlestar Multiscope battlestarScope) {
     this.scopeProvider = scopeProvider;
     this.fighterProvider = fighterProvider;
     this.rosterProvider = rosterProvider;
+    this.battlestarScope = battlestarScope;
   }
 
   /**
@@ -57,7 +63,7 @@ public class FighterFactory {
    * Preconditions: not in a fighter scope, and we need to be in the parent battlestar scope.
    */
   public FighterHolder create() {
-//    Preconditions.checkState(ExampleScopes.BATTLESTAR.isInScope(), "Not in Battlestar scope");
+    Preconditions.checkState(battlestarScope.isInScope(), "Not in Battlestar scope");
 
     ScopeInstance fighterScope = scopeProvider.get();
     FighterHolder fighter;

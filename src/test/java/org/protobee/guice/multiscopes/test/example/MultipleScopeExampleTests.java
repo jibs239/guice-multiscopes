@@ -110,9 +110,11 @@ public class MultipleScopeExampleTests extends AbstractMultiscopeTest {
       fighter.enterScope();
       assertTrue(battlestar.isInScope());
       assertTrue(fighter.isInScope());
+
       descoper.descope();
       assertFalse(battlestar.isInScope());
       assertFalse(fighter.isInScope());
+
       descoper.rescope();
       assertTrue(battlestar.isInScope());
       assertTrue(fighter.isInScope());

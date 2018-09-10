@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2012, Daniel Murphy and Deanna Surma
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
  *   * Redistributions of source code must retain the above copyright notice, this list of
@@ -20,42 +20,37 @@
  ******************************************************************************/
 package org.protobee.guice.multiscopes.util;
 
-import java.util.Set;
-
+import com.google.inject.Inject;
 import org.protobee.guice.multiscopes.Multiscope;
 
-
-import com.google.inject.Inject;
+import java.util.Set;
 
 /**
  * This {@link Descoper} applies to all {@link Multiscope}s.
- * 
+ *
  * @author Daniel
  */
 public class CompleteDescoper implements Descoper {
 
-  private final Descoper[] descopers;
+	private final Descoper[] descopers;
 
-  @Inject
-  public CompleteDescoper(Set<Descoper> descopers) {
-    this.descopers = new Descoper[descopers.size()];
-    int i = 0;
-    for (Descoper descoper : descopers) {
-      this.descopers[i++] = descoper;
-    }
-  }
+	@Inject public CompleteDescoper(Set<Descoper> descopers) {
+		this.descopers = new Descoper[descopers.size()];
+		int i = 0;
+		for (Descoper descoper : descopers) {
+			this.descopers[i++] = descoper;
+		}
+	}
 
-  @Override
-  public void descope() throws IllegalStateException {
-    for (Descoper descoper : descopers) {
-      descoper.descope();
-    }
-  }
+	@Override public void descope() throws IllegalStateException {
+		for (Descoper descoper : descopers) {
+			descoper.descope();
+		}
+	}
 
-  @Override
-  public void rescope() throws IllegalStateException {
-    for (Descoper descoper : descopers) {
-      descoper.rescope();
-    }
-  }
+	@Override public void rescope() throws IllegalStateException {
+		for (Descoper descoper : descopers) {
+			descoper.rescope();
+		}
+	}
 }

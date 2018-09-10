@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2012, Daniel Murphy and Deanna Surma
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
  *   * Redistributions of source code must retain the above copyright notice, this list of
@@ -20,32 +20,30 @@
  ******************************************************************************/
 package org.protobee.guice.multiscopes.util;
 
-import java.util.Set;
-
+import com.google.inject.Inject;
 import org.protobee.guice.multiscopes.Multiscope;
 
-import com.google.inject.Inject;
+import java.util.Set;
 
 /**
  * Utility to exit all multiscopes.  Helpful in testing.
  * <br/><br/>
  * If you need to exit and re-enter arbitary scopes, use a {@link Descoper}
  * or a {@link CompleteDescoper}
- * 
+ *
  * @author Daniel Murphy (daniel@dmurph.com)
  */
 public class MultiscopeExitor {
 
-  private final Set<Multiscope> multiscopes;
+	private final Set<Multiscope> multiscopes;
 
-  @Inject
-  public MultiscopeExitor(Set<Multiscope> multiscopes) {
-    this.multiscopes = multiscopes;
-  }
+	@Inject public MultiscopeExitor(Set<Multiscope> multiscopes) {
+		this.multiscopes = multiscopes;
+	}
 
-  public void exitAllScopes() {
-    for (Multiscope scope : multiscopes) {
-      scope.exitScope();
-    }
-  }
+	public void exitAllScopes() {
+		for (Multiscope scope : multiscopes) {
+			scope.exitScope();
+		}
+	}
 }

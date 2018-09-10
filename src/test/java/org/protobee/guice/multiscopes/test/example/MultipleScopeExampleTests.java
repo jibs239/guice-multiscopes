@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2012, Daniel Murphy and Deanna Surma
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
  *   * Redistributions of source code must retain the above copyright notice, this list of
@@ -20,10 +20,7 @@
  ******************************************************************************/
 package org.protobee.guice.multiscopes.test.example;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
+import com.google.inject.Key;
 import org.junit.Test;
 import org.protobee.guice.multiscopes.ScopeInstance;
 import org.protobee.guice.multiscopes.example.FighterFactory;
@@ -34,99 +31,93 @@ import org.protobee.guice.multiscopes.test.AbstractMultiscopeTest;
 import org.protobee.guice.multiscopes.util.CompleteDescoper;
 import org.protobee.guice.multiscopes.util.MultiscopeExitor;
 
-import com.google.inject.Key;
+import static org.junit.Assert.*;
 
 public class MultipleScopeExampleTests extends AbstractMultiscopeTest {
 
-  @Test
-  public void testFighterHasBattleship() {
-    FighterFactory fighterFactory = injector.getInstance(FighterFactory.class);
-    ScopeInstance battlestar =
-        injector.getInstance(Key.get(ScopeInstance.class, NewBattlestar.class));
+	@Test public void testFighterHasBattleship() {
+		FighterFactory fighterFactory = injector.getInstance(FighterFactory.class);
+		ScopeInstance battlestar = injector.getInstance(Key.get(ScopeInstance.class, NewBattlestar.class));
 
-    FighterHolder fighter;
-    try {
-      battlestar.enterScope();
+		FighterHolder fighter;
+		try {
+			battlestar.enterScope();
 
-      fighter = fighterFactory.create();
-      assertSame(battlestar, fighter.getBattlestar());
-    } finally {
-      battlestar.exitScope();
-    }
+			fighter = fighterFactory.create();
+			assertSame(battlestar, fighter.getBattlestar());
+		} finally {
+			battlestar.exitScope();
+		}
 
-    try {
-      fighter.enterScope();
-      assertSame(fighter, injector.getInstance(FighterHolder.class));
-    } finally {
-      fighter.exitScope();
-    }
-  }
+		try {
+			fighter.enterScope();
+			assertSame(fighter, injector.getInstance(FighterHolder.class));
+		} finally {
+			fighter.exitScope();
+		}
+	}
 
-  @Test
-  public void testEmbeddedScoping() {
-    FighterFactory fighterFactory = injector.getInstance(FighterFactory.class);
-    ScopeInstance battlestar =
-        injector.getInstance(Key.get(ScopeInstance.class, NewBattlestar.class));
+	@Test public void testEmbeddedScoping() {
+		FighterFactory fighterFactory = injector.getInstance(FighterFactory.class);
+		ScopeInstance battlestar = injector.getInstance(Key.get(ScopeInstance.class, NewBattlestar.class));
 
-    FighterHolder fighter;
-    try {
-      battlestar.enterScope();
-      fighter = fighterFactory.create();
-    } finally {
-      battlestar.exitScope();
-    }
+		FighterHolder fighter;
+		try {
+			battlestar.enterScope();
+			fighter = fighterFactory.create();
+		} finally {
+			battlestar.exitScope();
+		}
 
-    try {
-      battlestar.enterScope();
-      fighter.enterScope();
-      assertTrue(battlestar.isInScope());
-      assertTrue(fighter.isInScope());
-      assertSame(battlestar, injector.getInstance(Key.get(ScopeInstance.class, Battlestar.class)));
-      assertSame(fighter, injector.getInstance(FighterHolder.class));
-    } finally {
-      fighter.exitScope();
-      battlestar.exitScope();
-    }
-  }
+		try {
+			battlestar.enterScope();
+			fighter.enterScope();
+			assertTrue(battlestar.isInScope());
+			assertTrue(fighter.isInScope());
+			assertSame(battlestar, injector.getInstance(Key.get(ScopeInstance.class, Battlestar.class)));
+			assertSame(fighter, injector.getInstance(FighterHolder.class));
+		} finally {
+			fighter.exitScope();
+			battlestar.exitScope();
+		}
+	}
 
-  @Test
-  public void testCompleteDescoperAndExitor() {
-    FighterFactory fighterFactory = injector.getInstance(FighterFactory.class);
-    ScopeInstance battlestar =
-        injector.getInstance(Key.get(ScopeInstance.class, NewBattlestar.class));
-    CompleteDescoper descoper = injector.getInstance(CompleteDescoper.class);
-    MultiscopeExitor exitor = injector.getInstance(MultiscopeExitor.class);
+	@Test public void testCompleteDescoperAndExitor() {
+		FighterFactory fighterFactory = injector.getInstance(FighterFactory.class);
+		ScopeInstance battlestar = injector.getInstance(Key.get(ScopeInstance.class, NewBattlestar.class));
+		CompleteDescoper descoper = injector.getInstance(CompleteDescoper.class);
+		MultiscopeExitor exitor = injector.getInstance(MultiscopeExitor.class);
 
-    FighterHolder fighter;
-    try {
-      battlestar.enterScope();
-      fighter = fighterFactory.create();
-    } finally {
-      battlestar.exitScope();
-    }
+		FighterHolder fighter;
+		try {
+			battlestar.enterScope();
+			fighter = fighterFactory.create();
+		} finally {
+			battlestar.exitScope();
+		}
 
-    try {
-      battlestar.enterScope();
-      fighter.enterScope();
-      assertTrue(battlestar.isInScope());
-      assertTrue(fighter.isInScope());
+		try {
+			battlestar.enterScope();
+			fighter.enterScope();
+			assertTrue(battlestar.isInScope());
+			assertTrue(fighter.isInScope());
 
-      descoper.descope();
-      assertFalse(battlestar.isInScope());
-      assertFalse(fighter.isInScope());
+			descoper.descope();
+			assertFalse(battlestar.isInScope());
+			assertFalse(fighter.isInScope());
 
-      descoper.rescope();
-      assertTrue(battlestar.isInScope());
-      assertTrue(fighter.isInScope());
+			descoper.rescope();
+			assertTrue(battlestar.isInScope());
+			assertTrue(fighter.isInScope());
 
-      exitor.exitAllScopes();
-      assertFalse(battlestar.isInScope());
-      assertFalse(fighter.isInScope());
+			exitor.exitAllScopes();
+			assertFalse(battlestar.isInScope());
+			assertFalse(fighter.isInScope());
 
-    } finally {
-      // just in case there was an exception
-      fighter.exitScope();
-      battlestar.exitScope();
-    }
-  }
+		} finally {
+			// just in case there was an exception
+			fighter.exitScope();
+			battlestar.exitScope();
+		}
+	}
 }

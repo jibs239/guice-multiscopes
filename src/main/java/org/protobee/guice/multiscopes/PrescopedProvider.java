@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2012, Daniel Murphy and Deanna Surma
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
  *   * Redistributions of source code must retain the above copyright notice, this list of
@@ -20,10 +20,10 @@
  ******************************************************************************/
 package org.protobee.guice.multiscopes;
 
-import javax.annotation.Nullable;
-
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
+
+import javax.annotation.Nullable;
 
 /**
  * A provider that always throws an exception when {@link #get()} is called. Meant to be used for
@@ -31,46 +31,42 @@ import com.google.inject.ProvisionException;
  * {@link Multiscopes#bindAsPrescoped(com.google.inject.Binder, Class, Class, Class)} or
  * {@link Multiscopes#bindAsPrescoped(com.google.inject.Binder, Class, Class, com.google.inject.TypeLiteral)}
  * are called).
- * 
+ *
  * @author Daniel Murphy (daniel@dmurph.com)
  */
 public class PrescopedProvider<T> implements Provider<T> {
 
-  private final String exceptionMessage;
-  private final String description;
+	private final String exceptionMessage;
+	private final String description;
 
-  public PrescopedProvider() {
-    this(null, null);
-  }
+	public PrescopedProvider() {
+		this(null, null);
+	}
 
-  /**
-   * @param exceptionMessage the message for the exception when {@link #get()} is called
-   */
-  public PrescopedProvider(@Nullable String exceptionMessage) {
-    this(exceptionMessage, null);
-  }
+	/**
+	 * @param exceptionMessage the message for the exception when {@link #get()} is called
+	 */
+	public PrescopedProvider(@Nullable String exceptionMessage) {
+		this(exceptionMessage, null);
+	}
 
-  /**
-   * @param exceptionMessage the message for the exception when {@link #get()} is called
-   * @param description what's returned when {@link #toString()} is called
-   */
-  public PrescopedProvider(@Nullable String exceptionMessage, @Nullable String description) {
-    this.description = description;
-    this.exceptionMessage = exceptionMessage;
-  }
+	/**
+	 * @param exceptionMessage the message for the exception when {@link #get()} is called
+	 * @param description      what's returned when {@link #toString()} is called
+	 */
+	public PrescopedProvider(@Nullable String exceptionMessage, @Nullable String description) {
+		this.description = description;
+		this.exceptionMessage = exceptionMessage;
+	}
 
-  @Override
-  public T get() {
-    throw new ProvisionException(exceptionMessage != null
-        ? exceptionMessage
-        : "Prescoped object, this provider should never be called.");
-  }
+	@Override public T get() {
+		throw new ProvisionException(exceptionMessage != null ? exceptionMessage : "Prescoped object, this provider should never be called.");
+	}
 
-  @Override
-  public String toString() {
-    if (description == null) {
-      return "PrescopedProvider";
-    }
-    return description;
-  }
+	@Override public String toString() {
+		if (description == null) {
+			return "PrescopedProvider";
+		}
+		return description;
+	}
 }

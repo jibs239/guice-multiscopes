@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2012, Daniel Murphy and Deanna Surma
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
  *   * Redistributions of source code must retain the above copyright notice, this list of
@@ -24,7 +24,5 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-@RunWith(Suite.class)
-@SuiteClasses({MultipleScopeExampleTests.class, SingleScopeExampleTests.class,
-    BoundedScopeExampleTests.class})
-public class ExampleTestSuite {}
+@RunWith(Suite.class) @SuiteClasses({ MultipleScopeExampleTests.class, SingleScopeExampleTests.class, BoundedScopeExampleTests.class }) public class ExampleTestSuite {
+}

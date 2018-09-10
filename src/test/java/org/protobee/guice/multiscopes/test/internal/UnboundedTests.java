@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2012, Daniel Murphy and Deanna Surma
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
  *   * Redistributions of source code must retain the above copyright notice, this list of
@@ -20,19 +20,8 @@
  ******************************************************************************/
 package org.protobee.guice.multiscopes.test.internal;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.util.Set;
-
+import com.google.common.collect.Iterables;
+import com.google.inject.*;
 import org.junit.After;
 import org.junit.Test;
 import org.protobee.guice.multiscopes.Multiscope;
@@ -41,273 +30,248 @@ import org.protobee.guice.multiscopes.PrescopedProvider;
 import org.protobee.guice.multiscopes.ScopeInstance;
 import org.protobee.guice.multiscopes.util.MultiscopeExitor;
 
-import com.google.common.collect.Iterables;
-import com.google.inject.AbstractModule;
-import com.google.inject.BindingAnnotation;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.ProvisionException;
-import com.google.inject.ScopeAnnotation;
-import com.google.inject.TypeLiteral;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.util.Set;
+
+import static org.junit.Assert.*;
 
 public class UnboundedTests {
 
-  // scope binding annotation
-  @Retention(RetentionPolicy.RUNTIME)
-  @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
-  @BindingAnnotation
-  public static @interface Table {}
+	Injector inj;
 
-  // scope annotation
-  @Target({ElementType.TYPE, ElementType.METHOD})
-  @Retention(RetentionPolicy.RUNTIME)
-  @ScopeAnnotation
-  public static @interface TableScope {}
+	@After public void clearScopes() {
+		if (inj == null) {
+			return;
+		}
+		MultiscopeExitor exitor = inj.getInstance(MultiscopeExitor.class);
+		exitor.exitAllScopes();
+	}
 
-  // new scope instance annotation
-  @Retention(RetentionPolicy.RUNTIME)
-  @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
-  @BindingAnnotation
-  public static @interface NewTableInstance {}
+	@Test public void testScopePresentAndExitor() {
+		inj = Guice.createInjector(new UnboundedModule());
 
-  @TableScope
-  public static class Legs {}
+		TypeLiteral<Set<Multiscope>> multiscopesType = new TypeLiteral<Set<Multiscope>>() {
+		};
+		Set<Multiscope> multiscopes = inj.getInstance(Key.get(multiscopesType));
 
-  static class UnboundedModule extends AbstractModule {
-    @Override
-    protected void configure() {
-      Multiscopes.newBinder(binder(), TableScope.class, Table.class, NewTableInstance.class);
-    }
-  }
+		assertEquals(1, multiscopes.size());
+		Multiscope scope = inj.getInstance(Key.get(Multiscope.class, Table.class));
+		assertNotNull(scope);
+		assertSame(scope, inj.getInstance(Key.get(Multiscope.class, Table.class)));
+		assertEquals(scope, Iterables.getOnlyElement(multiscopes));
 
-  Injector inj;
+		MultiscopeExitor exitor = inj.getInstance(MultiscopeExitor.class);
 
-  @After
-  public void clearScopes() {
-    if (inj == null) {
-      return;
-    }
-    MultiscopeExitor exitor = inj.getInstance(MultiscopeExitor.class);
-    exitor.exitAllScopes();
-  }
+		ScopeInstance table = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
+		table.enterScope();
+		exitor.exitAllScopes();
+		assertFalse(table.isInScope());
+	}
 
-  @Test
-  public void testScopePresentAndExitor() {
-    inj = Guice.createInjector(new UnboundedModule());
+	@Test public void testScopeHolder() {
+		inj = Guice.createInjector(new UnboundedModule());
 
-    TypeLiteral<Set<Multiscope>> multiscopesType = new TypeLiteral<Set<Multiscope>>() {};
-    Set<Multiscope> multiscopes = inj.getInstance(Key.get(multiscopesType));
+		ScopeInstance table = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
+		assertFalse(table.isInScope());
 
-    assertEquals(1, multiscopes.size());
-    Multiscope scope = inj.getInstance(Key.get(Multiscope.class, Table.class));
-    assertNotNull(scope);
-    assertSame(scope, inj.getInstance(Key.get(Multiscope.class, Table.class)));
-    assertEquals(scope, Iterables.getOnlyElement(multiscopes));
+		try {
+			table.enterScope();
+			assertTrue(table.isInScope());
+			assertEquals(table, inj.getInstance(Key.get(ScopeInstance.class, Table.class)));
+		} finally {
+			table.exitScope();
+		}
 
-    MultiscopeExitor exitor = inj.getInstance(MultiscopeExitor.class);
+		assertFalse(table.isInScope());
 
-    ScopeInstance table = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
-    table.enterScope();
-    exitor.exitAllScopes();
-    assertFalse(table.isInScope());
-  }
+		ScopeInstance instance2 = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
 
-  @Test
-  public void testScopeHolder() {
-    inj = Guice.createInjector(new UnboundedModule());
+		assertNotSame(table, instance2);
+	}
 
-    ScopeInstance table = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
-    assertFalse(table.isInScope());
+	@Test public void testMultiscope() {
+		inj = Guice.createInjector(new UnboundedModule());
 
-    try {
-      table.enterScope();
-      assertTrue(table.isInScope());
-      assertEquals(table, inj.getInstance(Key.get(ScopeInstance.class, Table.class)));
-    } finally {
-      table.exitScope();
-    }
+		ScopeInstance table = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
+		Multiscope scope = inj.getInstance(Key.get(Multiscope.class, Table.class));
+		assertFalse(scope.isInScope());
+		assertEquals(Table.class, scope.getBindingAnnotation());
 
-    assertFalse(table.isInScope());
+		try {
+			table.enterScope();
+			assertTrue(scope.isInScope());
+		} finally {
+			scope.exitScope();
+			assertFalse(scope.isInScope());
+			assertFalse(table.isInScope());
+		}
 
-    ScopeInstance instance2 = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
+		assertFalse(table.isInScope());
 
-    assertNotSame(table, instance2);
-  }
-  
-  @Test
-  public void testMultiscope() {
-    inj = Guice.createInjector(new UnboundedModule());
+		ScopeInstance instance2 = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
 
-    ScopeInstance table = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
-    Multiscope scope = inj.getInstance(Key.get(Multiscope.class, Table.class));
-    assertFalse(scope.isInScope());
-    assertEquals(Table.class, scope.getBindingAnnotation());
+		assertNotSame(table, instance2);
+	}
 
-    try {
-      table.enterScope();
-      assertTrue(scope.isInScope());
-    } finally {
-      scope.exitScope();
-      assertFalse(scope.isInScope());
-      assertFalse(table.isInScope());
-    }
+	@Test public void testBasicScoping() {
+		inj = Guice.createInjector(new UnboundedModule());
 
-    assertFalse(table.isInScope());
+		ScopeInstance table = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
 
-    ScopeInstance instance2 = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
+		try {
+			table.enterScope();
+			Legs deck = inj.getInstance(Legs.class);
+			assertNotNull(deck);
+			assertTrue(deck == inj.getInstance(Legs.class));
+			table.exitScope();
+			table.enterScope();
+			assertTrue(deck == inj.getInstance(Legs.class));
+		} finally {
+			table.exitScope();
+		}
+	}
 
-    assertNotSame(table, instance2);
-  }
+	@Test public void testTwoScopeInstances() {
+		inj = Guice.createInjector(new UnboundedModule());
 
-  @Test
-  public void testBasicScoping() {
-    inj = Guice.createInjector(new UnboundedModule());
+		ScopeInstance table1 = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
+		ScopeInstance table2 = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
 
-    ScopeInstance table = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
+		Legs deck;
+		try {
+			table1.enterScope();
+			assertFalse(table2.isInScope());
+			deck = inj.getInstance(Legs.class);
+			assertNotNull(deck);
+		} finally {
+			table1.exitScope();
+		}
 
-    try {
-      table.enterScope();
-      Legs deck = inj.getInstance(Legs.class);
-      assertNotNull(deck);
-      assertTrue(deck == inj.getInstance(Legs.class));
-      table.exitScope();
-      table.enterScope();
-      assertTrue(deck == inj.getInstance(Legs.class));
-    } finally {
-      table.exitScope();
-    }
-  }
+		try {
+			table2.enterScope();
+			assertFalse(table1.isInScope());
+			assertNotSame(deck, inj.getInstance(Legs.class));
+		} finally {
+			table2.exitScope();
+		}
+	}
 
-  @Test
-  public void testTwoScopeInstances() {
-    inj = Guice.createInjector(new UnboundedModule());
+	@Test public void testExceptionOnPreviouslyEnteredScope() {
+		inj = Guice.createInjector(new UnboundedModule());
 
-    ScopeInstance table1 = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
-    ScopeInstance table2 = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
+		ScopeInstance table1 = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
 
-    Legs deck;
-    try {
-      table1.enterScope();
-      assertFalse(table2.isInScope());
-      deck = inj.getInstance(Legs.class);
-      assertNotNull(deck);
-    } finally {
-      table1.exitScope();
-    }
+		boolean caught = false;
+		try {
+			table1.enterScope();
+			table1.enterScope();
+		} catch (IllegalStateException e) {
+			caught = true;
+		} finally {
+			table1.exitScope();
+		}
+		assertTrue(caught);
 
-    try {
-      table2.enterScope();
-      assertFalse(table1.isInScope());
-      assertNotSame(deck, inj.getInstance(Legs.class));
-    } finally {
-      table2.exitScope();
-    }
-  }
+		ScopeInstance table2 = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
 
-  @Test
-  public void testExceptionOnPreviouslyEnteredScope() {
-    inj = Guice.createInjector(new UnboundedModule());
+		caught = false;
+		try {
+			table1.enterScope();
+			table2.enterScope();
+		} catch (IllegalStateException e) {
+			caught = true;
+		} finally {
+			table1.exitScope();
+		}
+		assertTrue(caught);
+	}
 
-    ScopeInstance table1 = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
+	@Test public void testExceptionWhenOutOfScope() {
+		inj = Guice.createInjector(new UnboundedModule());
 
-    boolean caught = false;
-    try {
-      table1.enterScope();
-      table1.enterScope();
-    } catch (IllegalStateException e) {
-      caught = true;
-    } finally {
-      table1.exitScope();
-    }
-    assertTrue(caught);
+		boolean caught = false;
+		try {
+			inj.getInstance(Legs.class);
+		} catch (ProvisionException e) {
+			caught = true;
+		}
+		assertTrue(caught);
+	}
 
+	@Test public void testPrescope() {
+		inj = Guice.createInjector(new UnboundedModule(), new AbstractModule() {
 
-    ScopeInstance table2 = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
+			@Override protected void configure() {
+				bind(Tablecloth.class).toProvider(new PrescopedProvider<Tablecloth>("Captain should have been prescoped")).in(TableScope.class);
+			}
+		});
 
-    caught = false;
-    try {
-      table1.enterScope();
-      table2.enterScope();
-    } catch (IllegalStateException e) {
-      caught = true;
-    } finally {
-      table1.exitScope();
-    }
-    assertTrue(caught);
-  }
+		ScopeInstance table = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
 
-  @Test
-  public void testExceptionWhenOutOfScope() {
-    inj = Guice.createInjector(new UnboundedModule());
+		Tablecloth captain = new Tablecloth();
+		table.putInScope(Key.get(Tablecloth.class), captain);
 
-    boolean caught = false;
-    try {
-      inj.getInstance(Legs.class);
-    } catch (ProvisionException e) {
-      caught = true;
-    }
-    assertTrue(caught);
-  }
+		try {
+			table.enterScope();
+			assertEquals(captain, inj.getInstance(Tablecloth.class));
+		} finally {
+			table.exitScope();
+		}
 
-  @TableScope
-  public static class Tablecloth {}
+		boolean caught = false;
+		try {
+			inj.getInstance(Tablecloth.class);
+		} catch (ProvisionException e) {
+			caught = true;
+		}
+		assertTrue(caught);
+	}
 
-  @Test
-  public void testPrescope() {
-    inj = Guice.createInjector(new UnboundedModule(), new AbstractModule() {
+	@Test public void testExceptionWhenNotPrescoped() {
+		inj = Guice.createInjector(new UnboundedModule(), new AbstractModule() {
 
-      @Override
-      protected void configure() {
-        bind(Tablecloth.class).toProvider(
-            new PrescopedProvider<Tablecloth>("Captain should have been prescoped")).in(
-            TableScope.class);
-      }
-    });
+			@Override protected void configure() {
+				bind(Tablecloth.class).toProvider(new PrescopedProvider<Tablecloth>("Captain should have been prescoped")).in(TableScope.class);
+			}
+		});
 
-    ScopeInstance table = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
+		boolean caught = false;
+		ScopeInstance table = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
+		try {
+			table.enterScope();
+			inj.getInstance(Tablecloth.class);
+		} catch (ProvisionException e) {
+			caught = true;
+		} finally {
+			table.exitScope();
+		}
+		assertTrue(caught);
+	}
 
-    Tablecloth captain = new Tablecloth();
-    table.putInScope(Key.get(Tablecloth.class), captain);
+	// scope binding annotation
+	@Retention(RetentionPolicy.RUNTIME) @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD }) @BindingAnnotation public static @interface Table {
+	}
 
-    try {
-      table.enterScope();
-      assertEquals(captain, inj.getInstance(Tablecloth.class));
-    } finally {
-      table.exitScope();
-    }
+	// scope annotation
+	@Target({ ElementType.TYPE, ElementType.METHOD }) @Retention(RetentionPolicy.RUNTIME) @ScopeAnnotation public static @interface TableScope {
+	}
 
-    boolean caught = false;
-    try {
-      inj.getInstance(Tablecloth.class);
-    } catch (ProvisionException e) {
-      caught = true;
-    }
-    assertTrue(caught);
-  }
+	// new scope instance annotation
+	@Retention(RetentionPolicy.RUNTIME) @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD }) @BindingAnnotation public static @interface NewTableInstance {
+	}
 
-  @Test
-  public void testExceptionWhenNotPrescoped() {
-    inj = Guice.createInjector(new UnboundedModule(), new AbstractModule() {
+	@TableScope public static class Legs {
+	}
 
-      @Override
-      protected void configure() {
-        bind(Tablecloth.class).toProvider(
-            new PrescopedProvider<Tablecloth>("Captain should have been prescoped")).in(
-            TableScope.class);
-      }
-    });
+	static class UnboundedModule extends AbstractModule {
+		@Override protected void configure() {
+			Multiscopes.newBinder(binder(), TableScope.class, Table.class, NewTableInstance.class);
+		}
+	}
 
-    boolean caught = false;
-    ScopeInstance table = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
-    try {
-      table.enterScope();
-      inj.getInstance(Tablecloth.class);
-    } catch (ProvisionException e) {
-      caught = true;
-    } finally {
-      table.exitScope();
-    }
-    assertTrue(caught);
-  }
+	@TableScope public static class Tablecloth {
+	}
 }

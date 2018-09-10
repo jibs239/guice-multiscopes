@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2012, Daniel Murphy and Deanna Surma
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
  *   * Redistributions of source code must retain the above copyright notice, this list of
@@ -20,85 +20,80 @@
  ******************************************************************************/
 package org.protobee.guice.multiscopes.scopes;
 
-import java.lang.annotation.Annotation;
-import java.util.Map;
-
-import org.protobee.guice.multiscopes.Multiscope;
-
 import com.google.inject.Key;
 import com.google.inject.OutOfScopeException;
 import com.google.inject.Provider;
+import org.protobee.guice.multiscopes.Multiscope;
+
+import java.lang.annotation.Annotation;
+import java.util.Map;
 
 /**
  * Assisted multiscope facilitates lazy prescoped objects
- * 
+ *
  * @author Daniel Murphy (daniel@dmurph.com)
  */
 public class AssistedMultiscope extends AbstractMultiscope {
 
-  public static class LazyScopedObject {
-    private final Provider<?> provider;
+	public AssistedMultiscope(Class<? extends Annotation> instanceAnnotation) {
+		super(instanceAnnotation);
+	}
 
-    public LazyScopedObject(Provider<?> provider) {
-      this.provider = provider;
-    }
+	@Override public <T> Provider<T> scope(final Key<T> key, final Provider<T> creator) {
+		final Object putLock = new Object();
+		final Multiscope scope = this;
+		return new Provider<T>() {
+			@SuppressWarnings("unchecked") public T get() {
 
-    public Provider<?> getProvider() {
-      return provider;
-    }
-  }
+				Map<Key<?>, Object> scopeMap = scopeContext.get();
 
-  public AssistedMultiscope(Class<? extends Annotation> instanceAnnotation) {
-    super(instanceAnnotation);
-  }
+				if (scopeMap == null) {
+					throw new OutOfScopeException("Cannot access scoped object '" + key + "'. This means we are not inside of a " + getName() + " scoped call.");
+				}
+				Object preT = scopeMap.get(key);
 
-  @Override
-  public <T> Provider<T> scope(final Key<T> key, final Provider<T> creator) {
-    final Object putLock = new Object();
-    final Multiscope scope = this;
-    return new Provider<T>() {
-      @SuppressWarnings("unchecked")
-      public T get() {
+				if (preT == null || preT instanceof LazyScopedObject) {
+					synchronized (putLock) {
+						preT = scopeMap.get(key);
+						if (preT == null || preT instanceof LazyScopedObject) {
+							if (preT == null) {
+								preT = creator.get();
+							} else {
+								preT = ((LazyScopedObject) preT).getProvider().get();
+							}
+							// TODO: for next guice release, add this check:
+							// if (!Scopes.isCircularProxy(t)) {
+							// Store a sentinel for provider-given null values.
+							scopeMap.put(key, preT != null ? preT : NullObject.INSTANCE);
+							// }
+						}
+					}
+				}
+				T t = (T) preT;
 
-        Map<Key<?>, Object> scopeMap = scopeContext.get();
+				// Accounts for @Nullable providers.
+				if (NullObject.INSTANCE == t) {
+					return null;
+				}
 
-        if (scopeMap == null) {
-          throw new OutOfScopeException("Cannot access scoped object '" + key
-              + "'. This means we are not inside of a " + getName() + " scoped call.");
-        }
-        Object preT = scopeMap.get(key);
+				return t;
+			}
 
-        if (preT == null || preT instanceof LazyScopedObject) {
-          synchronized (putLock) {
-            preT = scopeMap.get(key);
-            if (preT == null || preT instanceof LazyScopedObject) {
-              if (preT == null) {
-                preT = creator.get();
-              } else {
-                preT = ((LazyScopedObject) preT).getProvider().get();
-              }
-              // TODO: for next guice release, add this check:
-              // if (!Scopes.isCircularProxy(t)) {
-              // Store a sentinel for provider-given null values.
-              scopeMap.put(key, preT != null ? preT : NullObject.INSTANCE);
-              // }
-            }
-          }
-        }
-        T t = (T) preT;
+			@Override public String toString() {
+				return "{ key: " + key + ", unscopedProvider: " + creator + ", scope: " + scope + "}";
+			}
+		};
+	}
 
-        // Accounts for @Nullable providers.
-        if (NullObject.INSTANCE == t) {
-          return null;
-        }
+	public static class LazyScopedObject {
+		private final Provider<?> provider;
 
-        return t;
-      }
+		public LazyScopedObject(Provider<?> provider) {
+			this.provider = provider;
+		}
 
-      @Override
-      public String toString() {
-        return "{ key: " + key + ", unscopedProvider: " + creator + ", scope: " + scope + "}";
-      }
-    };
-  }
+		public Provider<?> getProvider() {
+			return provider;
+		}
+	}
 }

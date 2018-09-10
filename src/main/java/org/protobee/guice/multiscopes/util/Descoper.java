@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2012, Daniel Murphy and Deanna Surma
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
  *   * Redistributions of source code must retain the above copyright notice, this list of
@@ -26,23 +26,23 @@ package org.protobee.guice.multiscopes.util;
  * annotation, this descoper applies to all multiscopes.
  * <br/><br/>
  * If you need to just exit all scopes, try the {@link MultiscopeExitor}.
- * 
+ *
  * @author Daniel Murphy (daniel@dmurph.com)
  */
 public interface Descoper {
 
-  /**
-   * Exits any scope or scopes this descoper corresponds to
-   * 
-   * @throws IllegalStateException if {@link #descope()} was already called without a matching
-   *         {@link #rescope()}
-   */
-  void descope() throws IllegalStateException;
+	/**
+	 * Exits any scope or scopes this descoper corresponds to
+	 *
+	 * @throws IllegalStateException if {@link #descope()} was already called without a matching
+	 *                               {@link #rescope()}
+	 */
+	void descope() throws IllegalStateException;
 
-  /**
-   * Re-enters scopes that were exited
-   * 
-   * @throws IllegalStateException if the corresponding scope or scopes are already entered
-   */
-  void rescope() throws IllegalStateException;
+	/**
+	 * Re-enters scopes that were exited
+	 *
+	 * @throws IllegalStateException if the corresponding scope or scopes are already entered
+	 */
+	void rescope() throws IllegalStateException;
 }

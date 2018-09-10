@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2012, Daniel Murphy and Deanna Surma
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
  *   * Redistributions of source code must retain the above copyright notice, this list of
@@ -26,6 +26,5 @@ import org.junit.runners.Suite.SuiteClasses;
 import org.protobee.guice.multiscopes.test.example.ExampleTestSuite;
 import org.protobee.guice.multiscopes.test.internal.InternalTestSuite;
 
-@RunWith(Suite.class)
-@SuiteClasses({InternalTestSuite.class, ExampleTestSuite.class})
-public class MultiscopeTestSuite {}
+@RunWith(Suite.class) @SuiteClasses({ InternalTestSuite.class, ExampleTestSuite.class }) public class MultiscopeTestSuite {
+}

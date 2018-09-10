@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2012, Daniel Murphy and Deanna Surma
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
  *   * Redistributions of source code must retain the above copyright notice, this list of
@@ -22,6 +22,5 @@ package org.protobee.guice.multiscopes.example.scoped;
 
 import org.protobee.guice.multiscopes.example.scopes.GalaxyScope;
 
-@GalaxyScope
-public class GalaxyCenter {
+@GalaxyScope public class GalaxyCenter {
 }

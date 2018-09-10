@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2012, Daniel Murphy and Deanna Surma
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
  *   * Redistributions of source code must retain the above copyright notice, this list of
@@ -20,25 +20,24 @@
  ******************************************************************************/
 package org.protobee.guice.multiscopes;
 
-import org.protobee.guice.multiscopes.BoundedMultiscopeBinder.PrescopeType;
-
 import com.google.inject.Key;
+import org.protobee.guice.multiscopes.BoundedMultiscopeBinder.PrescopeType;
 
 class KeyWrapper {
 
-  private final Key<?> key;
-  private final PrescopeType type;
+	private final Key<?> key;
+	private final PrescopeType type;
 
-  public KeyWrapper(Key<?> key, PrescopeType type) {
-    this.key = key;
-    this.type = type;
-  }
+	public KeyWrapper(Key<?> key, PrescopeType type) {
+		this.key = key;
+		this.type = type;
+	}
 
-  public Key<?> getKey() {
-    return key;
-  }
-  
-  public PrescopeType getType() {
-    return type;
-  }
+	public Key<?> getKey() {
+		return key;
+	}
+
+	public PrescopeType getType() {
+		return type;
+	}
 }

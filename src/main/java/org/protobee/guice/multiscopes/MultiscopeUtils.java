@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2012, Daniel Murphy and Deanna Surma
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
  *   * Redistributions of source code must retain the above copyright notice, this list of
@@ -20,19 +20,20 @@
  ******************************************************************************/
 package org.protobee.guice.multiscopes;
 
-import java.util.Map;
-
 import com.google.common.collect.MapMaker;
 import com.google.inject.Key;
 
+import java.util.Map;
+
 public final class MultiscopeUtils {
 
-  private MultiscopeUtils() {}
+	private MultiscopeUtils() {
+	}
 
-  /**
-   * Creates a default scope map with concurrency level of 8 and initial capacity of 100.
-   */
-  public static Map<Key<?>, Object> createDefaultScopeMap() {
-    return new MapMaker().concurrencyLevel(8).initialCapacity(100).makeMap();
-  }
+	/**
+	 * Creates a default scope map with concurrency level of 8 and initial capacity of 100.
+	 */
+	public static Map<Key<?>, Object> createDefaultScopeMap() {
+		return new MapMaker().concurrencyLevel(8).initialCapacity(100).makeMap();
+	}
 }

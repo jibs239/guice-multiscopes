@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2012, Daniel Murphy and Deanna Surma
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
  *   * Redistributions of source code must retain the above copyright notice, this list of
@@ -20,52 +20,52 @@
  ******************************************************************************/
 package org.protobee.guice.multiscopes;
 
-import javax.annotation.Nullable;
-
 import com.google.inject.Key;
+
+import javax.annotation.Nullable;
 
 /**
  * An instance of a scope
- * 
+ *
  * @author Daniel Murphy (daniel@dmurph.com)
  */
 public interface ScopeInstance {
 
-  /**
-   * Enters the scope of this object for the calling thread. All injections of objects that are
-   * under the scope this object describes will be held by this object.
-   * 
-   * A call to {@link #enterScope()} should always be in a try-finally block, where
-   * {@link #exitScope()} is called in the finally block.
-   * 
-   * @throws IllegalStateException if we are already in the scope described by this object
-   */
-  void enterScope() throws IllegalStateException;
+	/**
+	 * Enters the scope of this object for the calling thread. All injections of objects that are
+	 * under the scope this object describes will be held by this object.
+	 * <p>
+	 * A call to {@link #enterScope()} should always be in a try-finally block, where
+	 * {@link #exitScope()} is called in the finally block.
+	 *
+	 * @throws IllegalStateException if we are already in the scope described by this object
+	 */
+	void enterScope() throws IllegalStateException;
 
-  /**
-   * true if the calling thread is currently in this object's scope instance (if we're in the same
-   * scope but in a different scope instance and this will be false)
-   */
-  boolean isInScope();
+	/**
+	 * true if the calling thread is currently in this object's scope instance (if we're in the same
+	 * scope but in a different scope instance and this will be false)
+	 */
+	boolean isInScope();
 
-  /**
-   * Exits the scope this object holds. Will not throw exceptions (safe for finally clauses)
-   */
-  void exitScope();
+	/**
+	 * Exits the scope this object holds. Will not throw exceptions (safe for finally clauses)
+	 */
+	void exitScope();
 
-  /**
-   * Puts the object in this scope. This should only be done when completely unavoidable, ie,
-   * working with other non-guice code.
-   * 
-   * @param key
-   * @param object
-   * @throws IllegalArgumentException if the key does not match the object
-   * @throws NullPointerException if the key is null
-   */
-  void putInScope(Key<?> key, @Nullable Object object) throws IllegalArgumentException;
+	/**
+	 * Puts the object in this scope. This should only be done when completely unavoidable, ie,
+	 * working with other non-guice code.
+	 *
+	 * @param key
+	 * @param object
+	 * @throws IllegalArgumentException if the key does not match the object
+	 * @throws NullPointerException     if the key is null
+	 */
+	void putInScope(Key<?> key, @Nullable Object object) throws IllegalArgumentException;
 
-  /**
-   * @return the unique id of this instance in it's respective scope
-   */
-  int getInstanceId();
+	/**
+	 * @return the unique id of this instance in it's respective scope
+	 */
+	int getInstanceId();
 }

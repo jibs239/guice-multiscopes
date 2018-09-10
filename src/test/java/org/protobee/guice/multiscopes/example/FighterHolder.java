@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2012, Daniel Murphy and Deanna Surma
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
  *   * Redistributions of source code must retain the above copyright notice, this list of
@@ -20,61 +20,58 @@
  ******************************************************************************/
 package org.protobee.guice.multiscopes.example;
 
+import com.google.inject.Inject;
 import org.protobee.guice.multiscopes.ScopeInstance;
 import org.protobee.guice.multiscopes.example.scopes.Battlestar;
-import org.protobee.guice.multiscopes.example.scopes.FighterScope;
 import org.protobee.guice.multiscopes.example.scopes.Fighter;
-
-import com.google.inject.Inject;
+import org.protobee.guice.multiscopes.example.scopes.FighterScope;
 
 /**
  * Represents a Fighter and hold it's scope. We use this holder to facilitate a hierarchy, where we
  * have a parent {@link Battlestar}. This hierarchical scoping is only facilitated through the
  * {@link FighterFactory} and our injected {@link Battlestar} {@link ScopeInstance}.
- * 
+ *
  * @author Daniel Murphy (daniel@dmurph.com)
  */
-@FighterScope
-public class FighterHolder {
+@FighterScope public class FighterHolder {
 
-  private final ScopeInstance scope;
-  private final ScopeInstance battlestar;
+	private final ScopeInstance scope;
+	private final ScopeInstance battlestar;
 
-  @Inject
-  public FighterHolder(@Fighter ScopeInstance scope, @Battlestar ScopeInstance battlestar) {
-    this.scope = scope;
-    this.battlestar = battlestar;
-  }
+	@Inject public FighterHolder(@Fighter ScopeInstance scope, @Battlestar ScopeInstance battlestar) {
+		this.scope = scope;
+		this.battlestar = battlestar;
+	}
 
-  public ScopeInstance getBattlestar() {
-    return battlestar;
-  }
+	public ScopeInstance getBattlestar() {
+		return battlestar;
+	}
 
-  public ScopeInstance getScope() {
-    return scope;
-  }
+	public ScopeInstance getScope() {
+		return scope;
+	}
 
-  /**
-   * Enters the fighter scope. Calls should be in a try-finally statement, with {@link #exitScope()}
-   * in the finally clause
-   * 
-   * @throws IllegalStateException if we're already in a figher scope
-   * @see ScopeInstance#enterScope()
-   */
-  public void enterScope() throws IllegalStateException {
-    scope.enterScope();
-  }
+	/**
+	 * Enters the fighter scope. Calls should be in a try-finally statement, with {@link #exitScope()}
+	 * in the finally clause
+	 *
+	 * @throws IllegalStateException if we're already in a figher scope
+	 * @see ScopeInstance#enterScope()
+	 */
+	public void enterScope() throws IllegalStateException {
+		scope.enterScope();
+	}
 
-  public boolean isInScope() {
-    return scope.isInScope();
-  }
+	public boolean isInScope() {
+		return scope.isInScope();
+	}
 
-  /**
-   * Exits the fighter scope.
-   * 
-   * @see ScopeInstance#exitScope()
-   */
-  public void exitScope() {
-    scope.exitScope();
-  }
+	/**
+	 * Exits the fighter scope.
+	 *
+	 * @see ScopeInstance#exitScope()
+	 */
+	public void exitScope() {
+		scope.exitScope();
+	}
 }

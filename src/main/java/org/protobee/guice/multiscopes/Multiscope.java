@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2012, Daniel Murphy and Deanna Surma
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
  *   * Redistributions of source code must retain the above copyright notice, this list of
@@ -20,12 +20,12 @@
  ******************************************************************************/
 package org.protobee.guice.multiscopes;
 
-import java.lang.annotation.Annotation;
-import java.util.Map;
-
 import com.google.common.base.Preconditions;
 import com.google.inject.Key;
 import com.google.inject.Scope;
+
+import java.lang.annotation.Annotation;
+import java.util.Map;
 
 /**
  * A scope that supports multiple instances of the scope itself. After binding your multiscope with
@@ -47,33 +47,33 @@ import com.google.inject.Scope;
  * bounded multiscopes are similar, except instead of having a 'newScopeInstance' annoatation, they
  * have a bound set of instances that is decided during injection (similar to a multiset, so other
  * guice modules can add instances)
- * 
+ *
  * @author Daniel Murphy (daniel@dmurph.com)
  */
 public abstract class Multiscope implements Scope {
 
-  private final Class<? extends Annotation> bindingAnnotation;
+	private final Class<? extends Annotation> bindingAnnotation;
 
-  public Multiscope(Class<? extends Annotation> bindingAnnotation) {
-    this.bindingAnnotation = Preconditions.checkNotNull(bindingAnnotation, "bindingAnnotation");
-  }
+	public Multiscope(Class<? extends Annotation> bindingAnnotation) {
+		this.bindingAnnotation = Preconditions.checkNotNull(bindingAnnotation, "bindingAnnotation");
+	}
 
-  /**
-   * If we're in this multiscope on the current thread.
-   */
-  public abstract boolean isInScope();
+	/**
+	 * If we're in this multiscope on the current thread.
+	 */
+	public abstract boolean isInScope();
 
-  /**
-   * Exits this multiscope on the current thread.
-   */
-  public abstract void exitScope();
+	/**
+	 * Exits this multiscope on the current thread.
+	 */
+	public abstract void exitScope();
 
-  /**
-   * The binding annotation given on configuration, used to specify this multiscope.
-   */
-  public Class<? extends Annotation> getBindingAnnotation() {
-    return bindingAnnotation;
-  }
+	/**
+	 * The binding annotation given on configuration, used to specify this multiscope.
+	 */
+	public Class<? extends Annotation> getBindingAnnotation() {
+		return bindingAnnotation;
+	}
 
-  protected abstract ScopeInstance createScopeInstance(final Map<Key<?>, Object> scopeMap);
+	protected abstract ScopeInstance createScopeInstance(final Map<Key<?>, Object> scopeMap);
 }

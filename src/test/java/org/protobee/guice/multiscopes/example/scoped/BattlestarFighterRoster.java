@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2012, Daniel Murphy and Deanna Surma
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
  *   * Redistributions of source code must retain the above copyright notice, this list of
@@ -20,33 +20,30 @@
  ******************************************************************************/
 package org.protobee.guice.multiscopes.example.scoped;
 
-import java.util.Set;
-
-import org.protobee.guice.multiscopes.example.FighterHolder;
-import org.protobee.guice.multiscopes.example.scopes.BattlestarScope;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import org.protobee.guice.multiscopes.example.FighterHolder;
+import org.protobee.guice.multiscopes.example.scopes.BattlestarScope;
 
-@BattlestarScope
-public class BattlestarFighterRoster {
-  public final Set<FighterHolder> fighters = Sets.newHashSet();
-  
-  @Inject
-  public BattlestarFighterRoster() {
-    
-  }
+import java.util.Set;
 
-  public void addFighter(FighterHolder fighter) {
-    fighters.add(fighter);
-  }
+@BattlestarScope public class BattlestarFighterRoster {
+	public final Set<FighterHolder> fighters = Sets.newHashSet();
 
-  public Set<FighterHolder> getFighters() {
-    return ImmutableSet.<FighterHolder>copyOf(fighters);
-  }
+	@Inject public BattlestarFighterRoster() {
 
-  public void removeFighter(FighterHolder fighter) {
-    fighters.remove(fighter);
-  }
+	}
+
+	public void addFighter(FighterHolder fighter) {
+		fighters.add(fighter);
+	}
+
+	public Set<FighterHolder> getFighters() {
+		return ImmutableSet.<FighterHolder>copyOf(fighters);
+	}
+
+	public void removeFighter(FighterHolder fighter) {
+		fighters.remove(fighter);
+	}
 }

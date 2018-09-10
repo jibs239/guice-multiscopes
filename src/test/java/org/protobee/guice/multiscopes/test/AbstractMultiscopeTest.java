@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2012, Daniel Murphy and Deanna Surma
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
  *   * Redistributions of source code must retain the above copyright notice, this list of
@@ -20,25 +20,22 @@
  ******************************************************************************/
 package org.protobee.guice.multiscopes.test;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.junit.After;
 import org.junit.Before;
 import org.protobee.guice.multiscopes.example.ExamplesGuiceModule;
 import org.protobee.guice.multiscopes.util.MultiscopeExitor;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-
 public class AbstractMultiscopeTest {
 
-  protected Injector injector;
-  
-  @Before
-  public void init() {
-    injector = Guice.createInjector(new ExamplesGuiceModule());
-  }
-  
-  @After
-  public void clearScopes() {
-    injector.getInstance(MultiscopeExitor.class).exitAllScopes();
-  }
+	protected Injector injector;
+
+	@Before public void init() {
+		injector = Guice.createInjector(new ExamplesGuiceModule());
+	}
+
+	@After public void clearScopes() {
+		injector.getInstance(MultiscopeExitor.class).exitAllScopes();
+	}
 }

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2012, Daniel Murphy and Deanna Surma
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
  *   * Redistributions of source code must retain the above copyright notice, this list of
@@ -20,17 +20,17 @@
  ******************************************************************************/
 package org.protobee.guice.multiscopes;
 
-import java.util.Map;
-
 import com.google.inject.Key;
 import com.google.inject.binder.LinkedBindingBuilder;
+
+import java.util.Map;
 
 /**
  * Created by {@link Multiscopes#newBinder(com.google.inject.Binder, Class, Class, Class)}.
  * Facilitates specifying a custom storage map provider for the scope instances.
- * 
+ *
  * @author Daniel Murphy (daniel@dmurph.com)
  */
 public interface MultiscopeBinder {
-  LinkedBindingBuilder<Map<Key<?>, Object>> bindScopeStorageMap();
+	LinkedBindingBuilder<Map<Key<?>, Object>> bindScopeStorageMap();
 }

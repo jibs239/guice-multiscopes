@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2012, Daniel Murphy and Deanna Surma
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
  *   * Redistributions of source code must retain the above copyright notice, this list of
@@ -20,23 +20,15 @@
  ******************************************************************************/
 package org.protobee.guice.multiscopes.example.scopes;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
+import com.google.inject.BindingAnnotation;
 import org.protobee.guice.multiscopes.ScopeInstance;
 
-import com.google.inject.BindingAnnotation;
+import java.lang.annotation.*;
 
 /**
  * Specifies the battlestar {@link ScopeInstance} in the {@link BattlestarScope}
- * 
+ *
  * @author Daniel Murphy (daniel@dmurph.com)
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
-@BindingAnnotation
-public @interface Battlestar {}
+@Documented @Retention(RetentionPolicy.RUNTIME) @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD }) @BindingAnnotation public @interface Battlestar {
+}

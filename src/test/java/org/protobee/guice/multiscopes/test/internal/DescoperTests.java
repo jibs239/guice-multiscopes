@@ -1,14 +1,6 @@
 package org.protobee.guice.multiscopes.test.internal;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
+import com.google.inject.*;
 import org.junit.After;
 import org.junit.Test;
 import org.protobee.guice.multiscopes.Multiscopes;
@@ -17,124 +9,108 @@ import org.protobee.guice.multiscopes.util.CompleteDescoper;
 import org.protobee.guice.multiscopes.util.Descoper;
 import org.protobee.guice.multiscopes.util.MultiscopeExitor;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.BindingAnnotation;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.ScopeAnnotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import static org.junit.Assert.*;
 
 public class DescoperTests {
 
-  // scope binding annotation
-  @Retention(RetentionPolicy.RUNTIME)
-  @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
-  @BindingAnnotation
-  public static @interface Table {}
+	Injector inj;
 
-  // scope annotation
-  @Target({ElementType.TYPE, ElementType.METHOD})
-  @Retention(RetentionPolicy.RUNTIME)
-  @ScopeAnnotation
-  public static @interface TableScope {}
+	@After public void clearScopes() {
+		if (inj == null) {
+			return;
+		}
+		MultiscopeExitor exitor = inj.getInstance(MultiscopeExitor.class);
+		exitor.exitAllScopes();
+	}
 
-  // new scope instance annotation
-  @Retention(RetentionPolicy.RUNTIME)
-  @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
-  @BindingAnnotation
-  public static @interface NewTableInstance {}
+	@Test public void simpleDescoperTest() {
+		inj = Guice.createInjector(new UnboundedModule());
 
-  // scope binding annotation
-  @Retention(RetentionPolicy.RUNTIME)
-  @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
-  @BindingAnnotation
-  public static @interface Chair {}
+		ScopeInstance table = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
+		Descoper descoper = inj.getInstance(Key.get(Descoper.class, Table.class));
 
-  // scope annotation
-  @Target({ElementType.TYPE, ElementType.METHOD})
-  @Retention(RetentionPolicy.RUNTIME)
-  @ScopeAnnotation
-  public static @interface ChairScope {}
+		try {
+			table.enterScope();
+			assertTrue(table.isInScope());
 
-  // new scope instance annotation
-  @Retention(RetentionPolicy.RUNTIME)
-  @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
-  @BindingAnnotation
-  public static @interface NewChairInstance {}
+			descoper.descope();
+			assertFalse(table.isInScope());
 
-  @TableScope
-  public static class Legs {}
+			descoper.rescope();
+			assertTrue(table.isInScope());
 
-  static class UnboundedModule extends AbstractModule {
-    @Override
-    protected void configure() {
-      Multiscopes.newBinder(binder(), TableScope.class, Table.class, NewTableInstance.class);
-      Multiscopes.newBinder(binder(), ChairScope.class, Chair.class, NewChairInstance.class);
-    }
-  }
+			assertEquals(table, inj.getInstance(Key.get(ScopeInstance.class, Table.class)));
+		} finally {
+			table.exitScope();
+		}
+	}
 
-  Injector inj;
+	@Test public void testTotalDescoper() {
+		inj = Guice.createInjector(new UnboundedModule());
 
-  @After
-  public void clearScopes() {
-    if (inj == null) {
-      return;
-    }
-    MultiscopeExitor exitor = inj.getInstance(MultiscopeExitor.class);
-    exitor.exitAllScopes();
-  }
+		ScopeInstance table = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
+		ScopeInstance chair = inj.getInstance(Key.get(ScopeInstance.class, NewChairInstance.class));
 
-  @Test
-  public void simpleDescoperTest() {
-    inj = Guice.createInjector(new UnboundedModule());
+		CompleteDescoper descoper = inj.getInstance(CompleteDescoper.class);
 
-    ScopeInstance table = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
-    Descoper descoper = inj.getInstance(Key.get(Descoper.class, Table.class));
+		try {
+			table.enterScope();
+			chair.enterScope();
+			assertTrue(table.isInScope());
+			assertTrue(chair.isInScope());
 
-    try {
-      table.enterScope();
-      assertTrue(table.isInScope());
+			descoper.descope();
+			assertFalse(table.isInScope());
+			assertFalse(chair.isInScope());
 
-      descoper.descope();
-      assertFalse(table.isInScope());
+			descoper.rescope();
+			assertTrue(table.isInScope());
+			assertTrue(chair.isInScope());
 
-      descoper.rescope();
-      assertTrue(table.isInScope());
+			assertEquals(table, inj.getInstance(Key.get(ScopeInstance.class, Table.class)));
+			assertEquals(chair, inj.getInstance(Key.get(ScopeInstance.class, Chair.class)));
+		} finally {
+			table.exitScope();
+			chair.exitScope();
+		}
+	}
 
-      assertEquals(table, inj.getInstance(Key.get(ScopeInstance.class, Table.class)));
-    } finally {
-      table.exitScope();
-    }
-  }
+	// scope binding annotation
+	@Retention(RetentionPolicy.RUNTIME) @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD }) @BindingAnnotation public static @interface Table {
+	}
 
-  @Test
-  public void testTotalDescoper() {
-    inj = Guice.createInjector(new UnboundedModule());
+	// scope annotation
+	@Target({ ElementType.TYPE, ElementType.METHOD }) @Retention(RetentionPolicy.RUNTIME) @ScopeAnnotation public static @interface TableScope {
+	}
 
-    ScopeInstance table = inj.getInstance(Key.get(ScopeInstance.class, NewTableInstance.class));
-    ScopeInstance chair = inj.getInstance(Key.get(ScopeInstance.class, NewChairInstance.class));
+	// new scope instance annotation
+	@Retention(RetentionPolicy.RUNTIME) @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD }) @BindingAnnotation public static @interface NewTableInstance {
+	}
 
-    CompleteDescoper descoper = inj.getInstance(CompleteDescoper.class);
+	// scope binding annotation
+	@Retention(RetentionPolicy.RUNTIME) @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD }) @BindingAnnotation public static @interface Chair {
+	}
 
-    try {
-      table.enterScope();
-      chair.enterScope();
-      assertTrue(table.isInScope());
-      assertTrue(chair.isInScope());
+	// scope annotation
+	@Target({ ElementType.TYPE, ElementType.METHOD }) @Retention(RetentionPolicy.RUNTIME) @ScopeAnnotation public static @interface ChairScope {
+	}
 
-      descoper.descope();
-      assertFalse(table.isInScope());
-      assertFalse(chair.isInScope());
+	// new scope instance annotation
+	@Retention(RetentionPolicy.RUNTIME) @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD }) @BindingAnnotation public static @interface NewChairInstance {
+	}
 
-      descoper.rescope();
-      assertTrue(table.isInScope());
-      assertTrue(chair.isInScope());
+	@TableScope public static class Legs {
+	}
 
-      assertEquals(table, inj.getInstance(Key.get(ScopeInstance.class, Table.class)));
-      assertEquals(chair, inj.getInstance(Key.get(ScopeInstance.class, Chair.class)));
-    } finally {
-      table.exitScope();
-      chair.exitScope();
-    }
-  }
+	static class UnboundedModule extends AbstractModule {
+		@Override protected void configure() {
+			Multiscopes.newBinder(binder(), TableScope.class, Table.class, NewTableInstance.class);
+			Multiscopes.newBinder(binder(), ChairScope.class, Chair.class, NewChairInstance.class);
+		}
+	}
 }
